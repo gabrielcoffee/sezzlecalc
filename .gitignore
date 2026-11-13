@@ -1,0 +1,14 @@
+# Go
+backend/server
+backend/coverage.out
+backend/coverage.html
+
+# Node
+node_modules/
+dist/
+coverage/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
