@@ -347,6 +347,28 @@ I asked claude to write it based on the original image comparing with the curren
 [pasted keycap spec: rebuild key styling as a moulded plastic keycap in a recessed well; isolated test page first in orange, dark grey and cream; layers: well, superellipse keycap body, radial face curvature, top/bottom rim, short contact shadow, faint feTurbulence noise, printed legend; one light direction from the top; one keycap definition with colours from CSS variables; pressed state moves the cap down 1-2px, no scale; 2x screenshot after each change with a critical review; apply to the keypad only after approval]
 ```
 
+## Prompt 22 — Apply keycaps, metal nameplate, no icons, prefetch questions
+
+- **Start:** 2026-11-15 11:56:38
+- **End:** 2026-11-15 11:58:41
+- **Active:** 2m 03s
+- **Outcome:** Keycaps applied to the keypad; nameplate uses a crop of the user's brushed-metal image, 903 heavier; all icons removed (Sound crossed out when off, Close as text); panel title aligned with the top bar buttons (within 0.6 px). Prefetch questions answered; two improvements proposed, not applied. Redeployed.
+
+```text
+these are good implement the new style please
+use this image [Image #4] middle part for the metal behind the name of the calculator instead of the current one, and 903 should be bolder
+
+still the history title is not aligned with the button
+also remove all icons from the project for sound just cross the word if off
+
+a few things to check for our debouncing solution
+if an expression is incomplete does it send the request?
+what happens if a response for an outdated expression arrive after the user has typed more what happens?
+if the user press = on an expression they've already typed, are the results cached for instant update even if before 0.5m delay?
+```
+
+Attached image: a brushed-metal texture (grey, vertical brushing, bright band in the middle).
+
 ---
 
 ## Breaks
@@ -359,10 +381,10 @@ I asked claude to write it based on the original image comparing with the curren
 ## Totals
 
 Elapsed is wall-clock time from the first prompt minus breaks:
-17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:47:22 (51m 30s).
+17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:58:41 (1h 02m 49s).
 
 | Measure | Time |
 |---------|------|
-| Elapsed, breaks excluded (as of 2026-11-15 11:47:22) | 2h 45m 19s |
-| Active, measured (prompts 6, 14, 17–21) | 40m 27s |
+| Elapsed, breaks excluded (as of 2026-11-15 11:58:41) | 2h 56m 38s |
+| Active, measured (prompts 6, 14, 17–22) | 42m 30s |
 | Budget | 2h target, 4h ceiling |
