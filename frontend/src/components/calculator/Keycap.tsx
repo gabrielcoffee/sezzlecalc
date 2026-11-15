@@ -13,7 +13,7 @@ import { useId, type ReactNode } from 'react'
 import './keycap.css'
 
 /** Superellipse |x/rx|^n + |y/ry|^n = 1 as an SVG path. */
-export function superellipse(cx: number, cy: number, rx: number, ry: number, n = 5, steps = 72): string {
+function superellipse(cx: number, cy: number, rx: number, ry: number, n = 5, steps = 72): string {
   const points: string[] = []
   for (let i = 0; i < steps; i++) {
     const t = (i / steps) * Math.PI * 2
