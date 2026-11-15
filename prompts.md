@@ -262,6 +262,30 @@ a few fixes:
 -keep consistent design, use the same fon used on the title to the buttons on the left and right, find skeumorphic icons for history and sound and clear history too, use the same font and skeumorphic icon
 ```
 
+## Prompt 18 — Second review round
+
+- **Start:** 2026-11-15 11:16:42
+- **End:** 2026-11-15 11:19:38
+- **Active:** 2m 56s
+- **Outcome:** Shake only the number; no stray focus ring after mouse clicks; "=" on a shown result blinks it; softer clicks; plain buttons with title font and icons; 11-digit display (backend tests confirm exact 11-digit math); quick result fade. 147 frontend tests pass. Redeployed.
+
+```text
+morefixes:
+
+-don't shake the screen when button pressed is not allowed, shake the result number only
+-the last component/button clicked with mouse gets a "selected" border when I type with keyboard, remove it
+-enter a calculation is another error that shouldn't happen if the result was already shown and user clicks = again just blink the result
+-I want a softer click sound, and i never asked for buttons stylized, I said consistent font and icon only
+-add one number to the limit the user can type the calculator clearly has 1 empty space on the left when typing maximum numbers, this could imply updates to backend and testing too verify
+- bring back the fade in and out to show result just a very quick one
+
+simplify the summaries after each iteration
+
+what other errors can be shown to the user like the one i talked about? list them
+and how can I run all the tests?
+how can I test the IP rate limit?
+```
+
 ---
 
 ## Breaks
@@ -274,10 +298,10 @@ a few fixes:
 ## Totals
 
 Elapsed is wall-clock time from the first prompt minus breaks:
-17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:09:31 (13m 39s).
+17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:19:38 (23m 46s).
 
 | Measure | Time |
 |---------|------|
-| Elapsed, breaks excluded (as of 2026-11-15 11:09:31) | 2h 07m 28s |
-| Active, measured (prompts 6, 14 and 17) | 30m 05s |
+| Elapsed, breaks excluded (as of 2026-11-15 11:19:38) | 2h 17m 35s |
+| Active, measured (prompts 6, 14, 17, 18) | 33m 01s |
 | Budget | 2h target, 4h ceiling |
