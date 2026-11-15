@@ -34,6 +34,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast: "cn-toast",
+          icon: "hidden", // text only, like the rest of the app
         },
       }}
       {...props}

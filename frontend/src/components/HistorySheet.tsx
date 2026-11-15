@@ -1,7 +1,5 @@
-import { XIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState, type KeyboardEvent, type PointerEvent } from 'react'
-import { TrashIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetTitle } from '@/components/ui/sheet'
@@ -109,6 +107,12 @@ export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, 
         // Don't hand focus back to the History button on close: a focused
         // button would catch Enter meant for "=".
         onCloseAutoFocus={(e) => e.preventDefault()}
+        // Focus the panel itself on open rather than its first button, which
+        // would show Close as highlighted. Tab still moves into the panel.
+        onOpenAutoFocus={(e) => {
+          e.preventDefault()
+          ;(e.currentTarget as HTMLElement).focus()
+        }}
         className="history-sheet flex flex-col gap-0 p-0"
         data-dragging={dragging || undefined}
         style={desktop ? { width: currentWidth, maxWidth: 'none' } : { height: currentHeight, maxHeight: 'none' }}
@@ -131,8 +135,8 @@ export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, 
         <div className="history-header" onPointerDown={desktop ? undefined : onPointerDown}>
           <SheetTitle className="history-title">History</SheetTitle>
           <SheetClose asChild>
-            <Button variant="ghost" size="icon-sm" className="chrome-button" aria-label="Close history">
-              <XIcon />
+            <Button variant="ghost" className="chrome-button" aria-label="Close history">
+              Close
             </Button>
           </SheetClose>
         </div>
@@ -184,7 +188,6 @@ export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, 
             }}
             disabled={entries.length === 0}
           >
-            <TrashIcon />
             Clear history
           </Button>
         </SheetFooter>

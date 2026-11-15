@@ -1,6 +1,5 @@
-import { Delete } from 'lucide-react'
-import { motion } from 'motion/react'
 import { blurIfPointer } from '@/lib/utils'
+import { Keycap } from './Keycap'
 import { KEY_ROWS, type KeyDef } from './keys'
 
 interface Props {
@@ -13,29 +12,20 @@ export function Keypad({ onPress, activeKey }: Props) {
   return (
     <div className="calc-tray" role="group" aria-label="Keypad">
       {KEY_ROWS.flat().map((key) => (
-        <motion.button
+        <button
           key={key.id}
           type="button"
-          className={`key key-${key.variant}`}
+          className="kc-well"
           aria-label={key.aria}
-          data-active={activeKey === key.id || undefined}
           onClick={(e) => {
             blurIfPointer(e)
             onPress(key)
           }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: 'spring', stiffness: 700, damping: 30 }}
         >
-          <span className="key-cap">
-            {key.id === 'backspace' ? (
-              <Delete className="key-icon" aria-hidden="true" strokeWidth={1.75} />
-            ) : (
-              <span className="key-label" aria-hidden="true">
-                {key.label}
-              </span>
-            )}
-          </span>
-        </motion.button>
+          <Keycap color={key.variant} pressed={activeKey === key.id}>
+            <span aria-hidden="true">{key.label}</span>
+          </Keycap>
+        </button>
       ))}
     </div>
   )

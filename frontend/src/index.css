@@ -168,9 +168,10 @@ body {
   background: rgb(255 255 255 / 0.07);
   color: var(--page-ink);
 }
-.chrome-button svg {
-  width: 1.6rem;
-  height: 1.6rem;
+.chrome-button[data-off] {
+  color: var(--page-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
 }
 
 /* History panel: slides fully in and out from its edge, no fade. Overrides
@@ -199,12 +200,15 @@ body {
 
 .history-header {
   display: flex;
+  height: 5rem; /* the top bar's height on desktop */
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 0.75rem 0.25rem 1.25rem;
+  padding: 0 1.5rem 0 1.25rem; /* close button's text ends where the top bar's does */
 }
 .history-sheet[data-side='bottom'] .history-header {
-  padding-top: 1.4rem; /* room for the grab bar */
+  height: 4.5rem;
+  padding: 0.6rem 0.75rem 0 1.25rem; /* room for the grab bar */
   touch-action: none;
   cursor: ns-resize;
 }

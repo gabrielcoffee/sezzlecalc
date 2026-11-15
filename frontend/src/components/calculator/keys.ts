@@ -1,7 +1,9 @@
 import type { Action } from '@/lib/calculator'
 import type { SoundName } from '@/lib/sound'
 
-export type KeyVariant = 'orange' | 'gray' | 'cream'
+import type { KeycapColor } from './Keycap'
+
+export type KeyVariant = KeycapColor
 
 export interface KeyDef {
   id: string
