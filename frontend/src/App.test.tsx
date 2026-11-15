@@ -197,6 +197,43 @@ describe('App', () => {
       expect(fetchMock).toHaveBeenCalledTimes(2)
     })
 
+    it('skips the early request when there is nothing to calculate', async () => {
+      const fetchMock = mockApi({})
+      const { press } = setup()
+      await press('2', 'plus') // would send just "2"
+      await pause()
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+
+    it('answers a repeated expression from the cache, with no request', async () => {
+      const fetchMock = mockApi({ '6 × 7': 42 })
+      const { press, value } = setup()
+      await press('6', 'times', '7', 'equals')
+      await waitFor(() => expect(value()).toBe('42'))
+      await press('clear', '6', 'times', '7', 'equals') // "=" before any pause
+      await waitFor(() => expect(value()).toBe('42'))
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('answers expressions from history instantly after a reload', async () => {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify([{ id: 'a', expression: '6 × 7', result: 42, time: Date.now() }]))
+      const fetchMock = mockApi({})
+      const { press, value } = setup()
+      await press('6', 'times', '7', 'equals')
+      await waitFor(() => expect(value()).toBe('42'))
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+
+    it('caches a definitive error but not a network failure', async () => {
+      const fetchMock = mockApi({ '1 ÷ 0': { status: 422, code: 'division_by_zero' } })
+      const { press, value } = setup()
+      await press('1', 'divide', '0', 'equals')
+      await waitFor(() => expect(value()).toBe('Err'))
+      await press('clear', '1', 'divide', '0', 'equals')
+      await waitFor(() => expect(value()).toBe('Err'))
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+
     it('retries on "=" when the early request failed in transit', async () => {
       let calls = 0
       vi.stubGlobal(

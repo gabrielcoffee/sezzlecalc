@@ -27,7 +27,7 @@ export default function App({ soundEngine }: { soundEngine?: SoundEngine }) {
 function Page() {
   const { play } = useSound()
   const history = useHistory()
-  const calc = useCalculator({ onResult: history.add })
+  const calc = useCalculator({ onResult: history.add, seed: history.entries })
   const [historyOpen, setHistoryOpen] = useState(false)
   const [historyOpenedAt, setHistoryOpenedAt] = useState(() => new Date())
   const [activeKey, setActiveKey] = useState<string | null>(null)

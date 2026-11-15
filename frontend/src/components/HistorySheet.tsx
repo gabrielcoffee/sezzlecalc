@@ -1,3 +1,4 @@
+import { XIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { Button } from '@/components/ui/button'
@@ -135,8 +136,8 @@ export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, 
         <div className="history-header" onPointerDown={desktop ? undefined : onPointerDown}>
           <SheetTitle className="history-title">History</SheetTitle>
           <SheetClose asChild>
-            <Button variant="ghost" className="chrome-button" aria-label="Close history">
-              Close
+            <Button variant="ghost" size="icon" className="chrome-button" aria-label="Close history">
+              <XIcon />
             </Button>
           </SheetClose>
         </div>

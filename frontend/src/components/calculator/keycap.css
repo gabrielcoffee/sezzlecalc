@@ -80,6 +80,21 @@
   pointer-events: none;
 }
 
+/* Operator glyphs are tiny in the display font: use a symbol font, thin,
+   sized so the glyph matches the digits' visual weight. */
+.kc-symbol {
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 1.6em;
+  font-weight: 300;
+  line-height: 1;
+}
+.kc-symbol-backspace {
+  font-size: 1.3em;
+}
+.kc-symbol-negate {
+  font-size: 1.5em;
+}
+
 /* Pressed: cap moves down 1.5px, contact shadow tightens, face darkens. No scale. */
 .kc-well:active .kc-cap,
 .kc[data-pressed] .kc-cap {

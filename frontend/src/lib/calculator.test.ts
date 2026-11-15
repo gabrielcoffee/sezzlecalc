@@ -193,18 +193,30 @@ describe('inserting a history value', () => {
 
 describe('prepare', () => {
   it('closes open parentheses', () => {
-    expect(prepare(keys('(2+3*(4'))).toEqual({ ok: true, expression: '(2 + 3 × (4))' })
+    expect(prepare(keys('(2+3*(4'))).toEqual({ ok: true, expression: '(2 + 3 × (4))', trivial: false })
   })
 
   it.each([
-    ['2+', '2'],
-    ['2+3*', '2 + 3'],
-    ['2+(', '2'],
-    ['(2+', '(2)'],
-    ['2*r', '2'],
-    ['2*(-', '2'],
-  ])('drops the unfinished tail of "%s" → %s', (input, expression) => {
-    expect(prepare(keys(input))).toEqual({ ok: true, expression })
+    ['2+', '2', true],
+    ['2+3*', '2 + 3', false],
+    ['2+(', '2', true],
+    ['(2+', '(2)', true],
+    ['2*r', '2', true],
+    ['2*(-', '2', true],
+  ])('drops the unfinished tail of "%s" → %s', (input, expression, trivial) => {
+    expect(prepare(keys(input))).toEqual({ ok: true, expression, trivial })
+  })
+
+  it.each([
+    ['5', true],
+    ['5n', true], // (−5)
+    ['-5', true],
+    ['(5)', true],
+    ['r9', false],
+    ['5%', false],
+    ['2^3', false],
+  ])('"%s" trivial: %s', (input, trivial) => {
+    expect(prepare(keys(input))).toMatchObject({ ok: true, trivial })
   })
 
   it.each([[''], ['r'], ['('], ['-']])('has nothing to send for "%s"', (input) => {

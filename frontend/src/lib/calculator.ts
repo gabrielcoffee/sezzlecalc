@@ -244,7 +244,8 @@ export function serialize(tokens: Token[]): string {
 }
 
 export type Prepared =
-  | { ok: true; expression: string }
+  /** `trivial`: nothing to calculate, e.g. "2 +" leaves just "2". */
+  | { ok: true; expression: string; trivial: boolean }
   | { ok: false; reason: 'pending' | 'empty' | 'too-long' }
 
 /**
@@ -258,7 +259,16 @@ export function prepare(state: CalcState): Prepared {
   if (tokens.length === 0) return { ok: false, reason: 'empty' }
   const expression = serialize(tokens) + ')'.repeat(openParens(tokens))
   if (expression.length > MAX_EXPRESSION_LENGTH) return { ok: false, reason: 'too-long' }
-  return { ok: true, expression }
+  return { ok: true, expression, trivial: !needsCalculation(tokens) }
+}
+
+/**
+ * True when the tokens contain an operation. A lone number, even negated or
+ * in parentheses ("2", "(−5)", "(2)"), has nothing to calculate; "√9" or
+ * "5%" do.
+ */
+function needsCalculation(tokens: Token[]): boolean {
+  return tokens.some((t) => t.kind === 'op' || t.kind === 'sqrt' || t.kind === 'pct')
 }
 
 function withoutUnfinishedTail(tokens: Token[]): Token[] {

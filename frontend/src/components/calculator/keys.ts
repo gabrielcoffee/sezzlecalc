@@ -11,6 +11,8 @@ export interface KeyDef {
   /** Spoken name for screen readers. */
   aria: string
   variant: KeyVariant
+  /** Operator glyphs: drawn larger, in a symbol font, to match the digits' size. */
+  symbol?: boolean
   sound: SoundName
   action: Action | 'evaluate'
 }
@@ -30,37 +32,37 @@ export const KEY_ROWS: KeyDef[][] = [
     { id: 'clear', label: 'C', aria: 'clear', variant: 'orange', sound: 'clear', action: { type: 'clear' } },
     { id: 'lparen', label: '(', aria: 'open parenthesis', variant: 'orange', sound: 'function', action: { type: 'lparen' } },
     { id: 'rparen', label: ')', aria: 'close parenthesis', variant: 'orange', sound: 'function', action: { type: 'rparen' } },
-    { id: 'negate', label: '±', aria: 'change sign', variant: 'orange', sound: 'function', action: { type: 'negate' } },
+    { id: 'negate', label: '±', aria: 'change sign', variant: 'orange', symbol: true, sound: 'function', action: { type: 'negate' } },
   ],
   [
     { id: 'sqrt', label: '√', aria: 'square root', variant: 'orange', sound: 'function', action: { type: 'sqrt' } },
     { id: 'power', label: 'xʸ', aria: 'power', variant: 'orange', sound: 'operator', action: { type: 'operator', op: '^' } },
     { id: 'percent', label: '%', aria: 'percent', variant: 'orange', sound: 'function', action: { type: 'percent' } },
-    { id: 'backspace', label: '⌫', aria: 'backspace', variant: 'orange', sound: 'backspace', action: { type: 'backspace' } },
+    { id: 'backspace', label: '⌫', aria: 'backspace', variant: 'orange', symbol: true, sound: 'backspace', action: { type: 'backspace' } },
   ],
   [
     digit('7'),
     digit('8'),
     digit('9'),
-    { id: 'subtract', label: '−', aria: 'minus', variant: 'cream', sound: 'operator', action: { type: 'operator', op: '−' } },
+    { id: 'subtract', label: '−', aria: 'minus', variant: 'cream', symbol: true, sound: 'operator', action: { type: 'operator', op: '−' } },
   ],
   [
     digit('4'),
     digit('5'),
     digit('6'),
-    { id: 'divide', label: '÷', aria: 'divide', variant: 'cream', sound: 'operator', action: { type: 'operator', op: '÷' } },
+    { id: 'divide', label: '÷', aria: 'divide', variant: 'cream', symbol: true, sound: 'operator', action: { type: 'operator', op: '÷' } },
   ],
   [
     digit('1'),
     digit('2'),
     digit('3'),
-    { id: 'multiply', label: '×', aria: 'times', variant: 'cream', sound: 'operator', action: { type: 'operator', op: '×' } },
+    { id: 'multiply', label: '×', aria: 'times', variant: 'cream', symbol: true, sound: 'operator', action: { type: 'operator', op: '×' } },
   ],
   [
     digit('0'),
     { id: 'decimal', label: '.', aria: 'decimal point', variant: 'gray', sound: 'digit', action: { type: 'decimal' } },
-    { id: 'equals', label: '=', aria: 'equals', variant: 'cream', sound: 'equals', action: 'evaluate' },
-    { id: 'add', label: '+', aria: 'plus', variant: 'cream', sound: 'operator', action: { type: 'operator', op: '+' } },
+    { id: 'equals', label: '=', aria: 'equals', variant: 'cream', symbol: true, sound: 'equals', action: 'evaluate' },
+    { id: 'add', label: '+', aria: 'plus', variant: 'cream', symbol: true, sound: 'operator', action: { type: 'operator', op: '+' } },
   ],
 ]
 

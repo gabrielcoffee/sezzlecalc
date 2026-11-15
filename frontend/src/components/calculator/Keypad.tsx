@@ -23,7 +23,9 @@ export function Keypad({ onPress, activeKey }: Props) {
           }}
         >
           <Keycap color={key.variant} pressed={activeKey === key.id}>
-            <span aria-hidden="true">{key.label}</span>
+            <span aria-hidden="true" className={key.symbol ? `kc-symbol kc-symbol-${key.id}` : undefined}>
+              {key.label}
+            </span>
           </Keycap>
         </button>
       ))}
