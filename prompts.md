@@ -148,12 +148,96 @@ write plan 1
 implement plan, and summarize what was done
 ```
 
+## Prompt 7 — Break
+
+- **Start:** 2026-11-13 18:39:45
+- **Outcome:** Clock paused for a break. Break time is excluded from the totals.
+
+```text
+pause the time right now, taking a break
+```
+
+## Prompt 8 — Resume, review Plan 1
+
+- **Start:** 2026-11-15 08:07:17
+- **Outcome:** Break ended, clock resumed. Project opened in VS Code for the user to review Plan 1.
+
+```text
+good morning, continue clocking from now on, I'll read the result, open it on vscode
+```
+
+## Prompt 9 — Go upgrade, one test command
+
+- **Start:** 2026-11-15 08:19:13
+- **Outcome:** Go 1.27.4 installer downloaded and verified (SHA-256 + Apple notarization); the user runs the sudo install. `make test` now prints coverage per package, `make test V=1` lists every test.
+
+```text
+download the latest go version 
+
+how can I run all tests with 1 command? and see the result
+```
+
+## Prompt 10 — Coverage question
+
+- **Start:** 2026-11-15 08:23:37
+- **Outcome:** Go 1.27.4 install confirmed (user ran the macOS Installer after `sudo` failed in the `!` shell). Claude misread the question as a request and started editing code to reach 100% coverage; interrupted by the user.
+
+```text
+why not 100%?   ok  .../cmd/server     coverage: 35.0% of statements
+  ok  .../internal/api   coverage: 98.3% of statements
+  ok  .../internal/calc  coverage: 98.6% of statements
+```
+
+## Prompt 11 — Correction
+
+- **Start:** between 08:23:37 and 08:29:42 (not stamped)
+- **Outcome:** Claude explained each uncovered line and listed the files it had changed.
+
+```text
+interrupted because it was a question, didn't ask for 100%, asked why not 100% yet, JUST answer
+```
+
+## Prompt 12 — Revert
+
+- **Start:** 2026-11-15 08:29:42
+- **Outcome:** Backend edits from prompt 10 reverted with `git checkout -- backend/`; tests pass on the Plan 1 code. Decision: 100% coverage not a goal; server startup stays untested.
+
+```text
+undo these last changes, we don't need 100% code coverage, it's just server startup
+```
+
+## Prompt 13 — Approve Plan 1, write Plan 2
+
+- **Start:** 2026-11-15 08:34:47
+- **Outcome:** Claude wrote Plan 2 (frontend). Found that Node 23 is unsupported by current Vitest/jsdom; plan installs Node 26 LTS via nvm.
+
+```text
+approved, plan 2 now
+```
+
+## Prompt 14 — Implement Plan 2, deploy
+
+- **Start:** 2026-11-15 08:43:41
+- **Outcome:** _in progress_
+
+```text
+implement plan, can the go backend be uploaded to versel? if publish everything by the end of the implementation so I can test it online
+```
+
 ---
+
+## Breaks
+
+| Start | End | Duration |
+|-------|-----|----------|
+| 2026-11-13 18:39:45 | 2026-11-15 08:07:17 | 37h 27m 32s |
 
 ## Totals
 
+Elapsed is wall-clock time from the first prompt minus breaks.
+
 | Measure | Time |
 |---------|------|
-| Elapsed (17:41:26 → 18:31:27) | 50m 01s |
+| Elapsed, breaks excluded (as of 2026-11-15 08:07:17) | 58m 19s |
 | Active, measured (prompt 6 only) | 6m 13s |
 | Budget | 2h target, 4h ceiling |

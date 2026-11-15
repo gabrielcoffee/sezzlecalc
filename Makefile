@@ -6,9 +6,10 @@ BACKEND := backend
 run:
 	cd $(BACKEND) && go run ./cmd/server
 
-## test: run all backend tests with the race detector
+## test: run all backend tests with the race detector and print coverage per package
+##       (make test V=1 lists every individual test)
 test:
-	cd $(BACKEND) && go test -race ./...
+	cd $(BACKEND) && go test -race -cover $(if $(V),-v) ./...
 
 ## cover: write backend/coverage.out and backend/coverage.html, print per-function coverage
 cover:
