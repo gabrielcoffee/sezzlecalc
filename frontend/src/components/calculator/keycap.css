@@ -1,0 +1,97 @@
+/* Keycap colours: the only thing that differs between keys. */
+.kc-orange {
+  --kc-base: #ee7a24;
+  --kc-highlight: #ffb06a;
+  --kc-shade: #b4500e;
+  --kc-ink: #fff3e6;
+  --kc-ink-shadow: rgb(110 40 0 / 0.45);
+}
+.kc-gray {
+  --kc-base: #5b5e5a;
+  --kc-highlight: #868984;
+  --kc-shade: #353734;
+  --kc-ink: #ecece6;
+  --kc-ink-shadow: rgb(0 0 0 / 0.5);
+}
+.kc-cream {
+  --kc-base: #ebe5d3;
+  --kc-highlight: #ffffff;
+  --kc-shade: #b6ae98;
+  --kc-ink: #3a3934;
+  --kc-ink-shadow: rgb(255 255 255 / 0.75);
+}
+
+/* Well: the dark cell the key sits in, deepest at the top edge. */
+.kc-well {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: #22211e;
+  box-shadow:
+    inset 0 4px 5px rgb(0 0 0 / 0.75),
+    inset 0 1px 1px rgb(0 0 0 / 0.9),
+    inset 0 -1px 0 rgb(255 255 255 / 0.06);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kc {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.kc-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.kc-contact {
+  fill: #000;
+  opacity: 0.6;
+  transition: opacity 60ms, transform 60ms;
+}
+.kc-body {
+  fill: var(--kc-shade);
+}
+.kc-grain {
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+}
+.kc-cap {
+  transition: transform 60ms ease-out, filter 60ms;
+}
+
+.kc-legend {
+  position: absolute;
+  inset: 0 0 6% 0; /* centred on the face, which sits above the body */
+  display: grid;
+  place-items: center;
+  color: var(--kc-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 5.6vw, 1.45rem);
+  font-weight: 400;
+  line-height: 1;
+  text-shadow: 0 1px 0 var(--kc-ink-shadow); /* printed: one 1px shadow, no glow */
+  transition: transform 60ms ease-out;
+  pointer-events: none;
+}
+
+/* Pressed: cap moves down 1.5px, contact shadow tightens, face darkens. No scale. */
+.kc-well:active .kc-cap,
+.kc[data-pressed] .kc-cap {
+  transform: translateY(1.5px);
+  filter: brightness(0.94);
+}
+.kc-well:active .kc-legend,
+.kc[data-pressed] .kc-legend {
+  transform: translateY(1.5px);
+}
+.kc-well:active .kc-contact,
+.kc[data-pressed] .kc-contact {
+  opacity: 0.35;
+  transform: translateY(-1px);
+}
