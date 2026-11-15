@@ -35,9 +35,11 @@ export function Display({ view, rejections, flashes }: Props) {
     animate(value.current, { x: [0, -7, 6, -4, 3, 0] }, { duration: 0.3, ease: 'easeOut' })
   }, [rejections, reduceMotion, animate, value])
 
-  useEffect(() => {
+  // Layout effect: starts the fade before the browser paints, so the new
+  // number never shows one frame at full brightness first.
+  useLayoutEffect(() => {
     if (flashes === 0) return
-    animate(value.current, { opacity: [0.2, 1] }, { duration: 0.05, ease: 'easeOut' })
+    animate(value.current, { opacity: [0.15, 1] }, { duration: 0.08, ease: 'easeOut' })
   }, [flashes, animate, value])
 
   // Keep the end of a long expression in view as it grows; the user can

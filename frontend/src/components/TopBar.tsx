@@ -11,7 +11,7 @@ export function TopBar({ onOpenHistory }: Props) {
   const { enabled, toggle } = useSound()
 
   return (
-    <header className="relative z-10 flex h-16 items-center justify-between gap-2 px-3 sm:h-20 sm:px-6">
+    <header className="relative z-10 flex h-16 items-center justify-between gap-2 px-3 sm:absolute sm:inset-x-0 sm:top-0 sm:h-20 sm:px-6">
       {/* The name is on the calculator's nameplate; keep a heading for screen readers. */}
       <h1 className="sr-only">SZLCALC 903 calculator</h1>
 

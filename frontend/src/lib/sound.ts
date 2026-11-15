@@ -15,8 +15,6 @@ export type SoundName =
   | 'error'
   | 'reject'
   | 'toggle'
-  | 'open'
-  | 'close'
   | 'select'
 
 interface Click {
@@ -56,9 +54,6 @@ const RECIPES: Record<SoundName, Click[]> = {
     { tone: 2600, q: 1.4, decay: 0.014, gain: 0.18 },
     { delay: 0.025, tone: 2000, q: 1.2, decay: 0.018, gain: 0.15, body: 0.06 },
   ],
-  // Paper tape sliding: airy.
-  open: [{ tone: 1400, q: 0.5, decay: 0.09, gain: 0.12 }],
-  close: [{ tone: 1100, q: 0.5, decay: 0.07, gain: 0.1 }],
 }
 
 type ContextFactory = () => AudioContext | null

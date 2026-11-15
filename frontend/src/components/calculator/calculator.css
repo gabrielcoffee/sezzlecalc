@@ -33,7 +33,15 @@
   overflow: hidden; /* keeps the ridges inside the rounded corners */
 }
 
-/* Phones: edge to edge. Larger screens: a device floating on the page. */
+/* Phones: edge to edge, running to the bottom of the screen. */
+@media (max-width: 639px) {
+  .calc-body {
+    flex: 1;
+    padding-bottom: max(clamp(16px, 5vw, 24px), env(safe-area-inset-bottom));
+  }
+}
+
+/* Larger screens: a device floating on the page. */
 @media (min-width: 640px) {
   .calc-body {
     width: 380px;

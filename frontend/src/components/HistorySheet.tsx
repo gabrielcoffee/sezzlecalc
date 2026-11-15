@@ -1,9 +1,10 @@
+import { XIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { TrashIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetTitle } from '@/components/ui/sheet'
 import { groupByDay, type HistoryEntry } from '@/hooks/use-history'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { formatFull } from '@/lib/format'
@@ -20,45 +21,69 @@ interface Props {
   onClear: () => void
 }
 
-// Panel size the user dragged to, remembered between visits.
-// Width applies on desktop (panel on the right), height on phones (bottom).
-const SIZE_KEY = 'szlcalc:history-size'
-const MIN = 260
+// Desktop: the panel width the user dragged to, remembered between visits.
+const WIDTH_KEY = 'szlcalc:history-width'
+const MIN_WIDTH = 260
 const STEP = 32
-type Size = { width: number; height: number }
-const isSize = (v: unknown): v is Size =>
-  typeof v === 'object' && v !== null && typeof (v as Size).width === 'number' && typeof (v as Size).height === 'number'
+const isNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 
-const clamp = (value: number, max: number) => Math.round(Math.min(Math.max(value, MIN), max))
+// Phones: the panel opens at a default height and snaps, on release, to that
+// height, to the full screen, or closes when dragged well below the default.
+const DEFAULT_SHARE = 0.55
+const CLOSE_BELOW = 0.6 // of the default height
 
 export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, onClear }: Props) {
   const desktop = useMediaQuery('(min-width: 640px)')
-  const [size, setSize] = useState<Size>(() => loadJSON(SIZE_KEY, { width: 384, height: 480 }, isSize))
+  const [width, setWidth] = useState(() => loadJSON(WIDTH_KEY, 384, isNumber))
+  const [mobileHeight, setMobileHeight] = useState<number | null>(null) // null: default
+  const [dragging, setDragging] = useState(false)
   const groups = groupByDay(entries, openedAt)
 
   const maxWidth = window.innerWidth * 0.9
-  const maxHeight = window.innerHeight * 0.92
-  const current = desktop ? clamp(size.width, maxWidth) : clamp(size.height, maxHeight)
+  const fullHeight = window.innerHeight
+  const defaultHeight = Math.round(fullHeight * DEFAULT_SHARE)
+  const clampWidth = (w: number) => Math.round(Math.min(Math.max(w, MIN_WIDTH), maxWidth))
+  const currentWidth = clampWidth(width)
+  const currentHeight = mobileHeight ?? defaultHeight
 
-  const resize = (value: number) => {
-    setSize((prev) => {
-      const next = desktop ? { ...prev, width: clamp(value, maxWidth) } : { ...prev, height: clamp(value, maxHeight) }
-      saveJSON(SIZE_KEY, next)
-      return next
-    })
+  const resizeWidth = (w: number) => {
+    const next = clampWidth(w)
+    setWidth(next)
+    saveJSON(WIDTH_KEY, next)
   }
 
-  // Drag the handle: the panel edge follows the pointer.
-  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+  const snap = (h: number) => {
+    if (h < defaultHeight * CLOSE_BELOW) {
+      onOpenChange(false)
+      return
+    }
+    setMobileHeight(h > (defaultHeight + fullHeight) / 2 ? fullHeight : null)
+  }
+
+  // Dragging follows the pointer directly, with no easing, so the panel and
+  // its list never lag behind the finger or mouse.
+  const onPointerDown = (e: PointerEvent<HTMLElement>) => {
+    if (e.target instanceof Element && e.target.closest('button')) return
     e.preventDefault()
     const handle = e.currentTarget
     handle.setPointerCapture(e.pointerId)
-    const move = (ev: globalThis.PointerEvent) =>
-      resize(desktop ? window.innerWidth - ev.clientX : window.innerHeight - ev.clientY)
+    setDragging(true)
+    let last = desktop ? currentWidth : currentHeight
+    const move = (ev: globalThis.PointerEvent) => {
+      if (desktop) {
+        last = window.innerWidth - ev.clientX
+        resizeWidth(last)
+      } else {
+        last = Math.min(Math.max(window.innerHeight - ev.clientY, 0), fullHeight)
+        setMobileHeight(last)
+      }
+    }
     const stop = () => {
       handle.removeEventListener('pointermove', move)
       handle.removeEventListener('pointerup', stop)
       handle.removeEventListener('pointercancel', stop)
+      setDragging(false)
+      if (!desktop) snap(last)
     }
     handle.addEventListener('pointermove', move)
     handle.addEventListener('pointerup', stop)
@@ -66,32 +91,35 @@ export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, 
   }
 
   // Keyboard resizing for the same handle.
-  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     const grow = desktop ? 'ArrowLeft' : 'ArrowUp'
     const shrink = desktop ? 'ArrowRight' : 'ArrowDown'
     if (e.key !== grow && e.key !== shrink) return
     e.preventDefault()
-    resize(current + (e.key === grow ? STEP : -STEP))
+    if (desktop) resizeWidth(currentWidth + (e.key === grow ? STEP : -STEP))
+    else setMobileHeight(e.key === grow ? fullHeight : null)
   }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={desktop ? 'right' : 'bottom'}
+        showCloseButton={false}
         aria-describedby={undefined}
         // Don't hand focus back to the History button on close: a focused
         // button would catch Enter meant for "=".
         onCloseAutoFocus={(e) => e.preventDefault()}
         className="history-sheet flex flex-col gap-0 p-0"
-        style={desktop ? { width: current, maxWidth: 'none' } : { height: current, maxHeight: 'none' }}
+        data-dragging={dragging || undefined}
+        style={desktop ? { width: currentWidth, maxWidth: 'none' } : { height: currentHeight, maxHeight: 'none' }}
       >
         <div
           role="separator"
           aria-orientation={desktop ? 'vertical' : 'horizontal'}
           aria-label="Resize history panel"
-          aria-valuenow={current}
-          aria-valuemin={MIN}
-          aria-valuemax={Math.round(desktop ? maxWidth : maxHeight)}
+          aria-valuenow={desktop ? currentWidth : currentHeight}
+          aria-valuemin={desktop ? MIN_WIDTH : defaultHeight}
+          aria-valuemax={Math.round(desktop ? maxWidth : fullHeight)}
           tabIndex={0}
           className="history-resize"
           data-side={desktop ? 'right' : 'bottom'}
@@ -99,9 +127,15 @@ export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, 
           onKeyDown={onKeyDown}
         />
 
-        <SheetHeader className="border-b border-border/60 px-5 py-4">
-          <SheetTitle className="font-display text-sm tracking-[0.2em]">HISTORY</SheetTitle>
-        </SheetHeader>
+        {/* On phones the header is a drag area too. */}
+        <div className="history-header" onPointerDown={desktop ? undefined : onPointerDown}>
+          <SheetTitle className="history-title">History</SheetTitle>
+          <SheetClose asChild>
+            <Button variant="ghost" size="icon-sm" className="chrome-button" aria-label="Close history">
+              <XIcon />
+            </Button>
+          </SheetClose>
+        </div>
 
         <ScrollArea className="min-h-0 flex-1">
           {entries.length === 0 ? (

@@ -34,7 +34,7 @@ function fakeContext(state: AudioContextState = 'running') {
 
 const ALL: SoundName[] = [
   'digit', 'operator', 'function', 'equals', 'clear', 'backspace',
-  'error', 'reject', 'toggle', 'open', 'close', 'select',
+  'error', 'reject', 'toggle', 'select',
 ]
 
 describe('createSoundEngine', () => {

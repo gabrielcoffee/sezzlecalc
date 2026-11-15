@@ -180,14 +180,43 @@ body {
   animation: sheet-in-right 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .history-sheet[data-state='closed'][data-side='right'] {
-  animation: sheet-out-right 240ms cubic-bezier(0.7, 0, 0.84, 0);
+  animation: sheet-out-right 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .history-sheet[data-state='open'][data-side='bottom'] {
   animation: sheet-in-bottom 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .history-sheet[data-state='closed'][data-side='bottom'] {
-  animation: sheet-out-bottom 240ms cubic-bezier(0.7, 0, 0.84, 0);
+  animation: sheet-out-bottom 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
+/* No easing on size changes: the panel and its list follow the drag at once.
+   On phones, only the snap after release glides into place. */
+.history-sheet {
+  transition: none;
+}
+.history-sheet[data-side='bottom']:not([data-dragging]) {
+  transition: height 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 0.75rem 0.25rem 1.25rem;
+}
+.history-sheet[data-side='bottom'] .history-header {
+  padding-top: 1.4rem; /* room for the grab bar */
+  touch-action: none;
+  cursor: ns-resize;
+}
+.history-title {
+  color: var(--page-ink);
+  font-family: var(--font-display);
+  font-size: 0.68rem; /* same as the buttons */
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 @keyframes sheet-in-right { from { transform: translateX(100%); } }
 @keyframes sheet-out-right { to { transform: translateX(100%); } }
 @keyframes sheet-in-bottom { from { transform: translateY(100%); } }

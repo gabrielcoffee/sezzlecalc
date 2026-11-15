@@ -53,7 +53,7 @@ function Page() {
   const setOpen = (open: boolean) => {
     if (open) setHistoryOpenedAt(new Date())
     setHistoryOpen(open)
-    play(open ? 'open' : 'close')
+    play('toggle') // same switch sound as the sound button
   }
 
   const selectEntry = (entry: HistoryEntry) => {
@@ -69,10 +69,14 @@ function Page() {
   return (
     <div className="page flex min-h-dvh flex-col">
       <TopBar onOpenHistory={() => setOpen(true)} />
-      <main className="flex flex-1 items-start justify-center sm:items-center sm:p-6 sm:pb-12">
+      {/* Phones: the calculator body runs to the bottom of the screen.
+          Larger screens: centred in the whole viewport (the top bar floats
+          over it, and equal top/bottom padding keeps them apart). */}
+      <main className="flex flex-1 flex-col sm:items-center sm:justify-center sm:px-6 sm:py-20">
         <Calculator calc={calc} activeKey={activeKey} onPress={onPress} />
       </main>
       <HistorySheet
+        key={historyOpenedAt.getTime()} // fresh panel per opening: phones start at the default height
         open={historyOpen}
         openedAt={historyOpenedAt}
         onOpenChange={setOpen}
