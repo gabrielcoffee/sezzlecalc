@@ -1,0 +1,256 @@
+/*
+ * SZLCALC 903 body. Everything is drawn with CSS gradients and shadows;
+ * no images. Colors follow the retro reference: cream plastic shell, orange
+ * 7-segment display, orange function keys, dark-gray digits, cream operators.
+ */
+
+@font-face {
+  font-family: 'DSEG7 Classic';
+  src: url('../../assets/fonts/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: block;
+}
+
+.calc-body {
+  --shell-hi: #ecebe1;
+  --shell: #dddbcd;
+  --shell-lo: #c9c6b5;
+  --segment: #ff6a1f;
+  --segment-glow: rgb(255 98 20 / 0.55);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 3.5vw, 16px);
+  width: 100%;
+  padding: 30px clamp(14px, 4.5vw, 22px) clamp(16px, 5vw, 24px);
+  background:
+    linear-gradient(180deg, var(--shell-hi) 0%, var(--shell) 35%, var(--shell-lo) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -3px 6px rgb(0 0 0 / 0.12);
+  font-family: var(--font-display);
+  overflow: hidden; /* keeps the ridges inside the rounded corners */
+}
+
+/* Phones: edge to edge. Larger screens: a device floating on the page. */
+@media (min-width: 640px) {
+  .calc-body {
+    width: 380px;
+    border-radius: 26px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.85),
+      inset 0 -4px 8px rgb(0 0 0 / 0.14),
+      0 2px 0 #a9a594,
+      0 30px 60px -12px rgb(0 0 0 / 0.65),
+      0 12px 24px -8px rgb(0 0 0 / 0.5);
+  }
+}
+
+/* The three molded ridges across the top of the shell. */
+.calc-ridges {
+  position: absolute;
+  top: 9px;
+  left: 0;
+  right: 0;
+  height: 13px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0.16) 0 1px,
+    rgb(255 255 255 / 0.7) 1px 2px,
+    transparent 2px 5px
+  );
+  pointer-events: none;
+}
+
+/* ---- display ---- */
+
+.calc-display {
+  position: relative;
+  padding: 10px 14px 12px;
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.06), transparent 40%),
+    radial-gradient(ellipse at 50% 120%, #2a0f05, #0b0605 70%);
+  box-shadow:
+    inset 0 2px 10px rgb(0 0 0 / 0.9),
+    0 0 0 3px #1a1714,
+    0 1px 0 4px rgb(255 255 255 / 0.5);
+  overflow: hidden;
+  container-type: inline-size; /* digits are sized from the window width */
+}
+
+.display-expression {
+  display: flex;
+  justify-content: flex-end; /* long expressions overflow to the left: the end stays visible */
+  overflow: hidden;
+  height: 1.1rem;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.1rem;
+  color: rgb(255 140 70 / 0.7);
+  white-space: nowrap;
+}
+.display-expression[data-hint] {
+  color: #ffb27a;
+}
+
+.display-main {
+  position: relative;
+  /* 11 digit cells (10 digits + sign) are ~0.81em wide each, so 10.8cqw fills the window. */
+  height: 13.5cqw;
+  font-family: 'DSEG7 Classic', ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 10.8cqw;
+  line-height: 1;
+  font-style: italic; /* the 7-segment slant of the reference */
+}
+
+.display-ghost,
+.display-value {
+  position: absolute;
+  right: 0;
+  bottom: 0.2rem;
+  white-space: nowrap;
+}
+
+.display-ghost {
+  color: rgb(255 106 31 / 0.07);
+}
+
+.display-value {
+  color: var(--segment);
+  text-shadow:
+    0 0 6px var(--segment-glow),
+    0 0 18px rgb(255 80 0 / 0.25);
+}
+
+.calc-display[data-pending] .display-value {
+  animation: segment-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes segment-pulse {
+  50% { opacity: 0.35; }
+}
+
+/* ---- nameplate ---- */
+
+.nameplate {
+  align-self: center;
+  padding: 7px 18px 6px;
+  border: 1px solid #8f8f8a;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.12) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #f4f4f2 0%, #c9c9c5 48%, #b4b4af 52%, #e6e6e2 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 1px 2px rgb(0 0 0 / 0.25);
+  color: #2b2b29;
+  font-size: clamp(0.8rem, 3.6vw, 0.95rem);
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.6);
+  white-space: nowrap;
+}
+.nameplate strong {
+  font-weight: 900;
+  -webkit-text-stroke: 0.6px currentColor; /* Michroma ships one weight; fake the bold */
+}
+
+/* ---- keypad ---- */
+
+.calc-tray {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  padding: 3px;
+  border-radius: 5px;
+  background: #121110;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.6);
+}
+
+.key {
+  --cap-hi: #7c7f7a;
+  --cap: #5a5d59;
+  --cap-lo: #474a46;
+  --well: #343633;
+  --ink: #f2f2ec;
+
+  position: relative;
+  aspect-ratio: 1 / 0.94;
+  padding: 0;
+  border: 0;
+  background: var(--well);
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.key:first-child { border-top-left-radius: 3px; }
+
+.key-orange {
+  --cap-hi: #ffad5c;
+  --cap: #f2802a;
+  --cap-lo: #d9620f;
+  --well: #b44c06;
+  --ink: #fff6ec;
+}
+.key-cream {
+  --cap-hi: #ffffff;
+  --cap: #f3efe1;
+  --cap-lo: #ddd6c0;
+  --well: #b8b09a;
+  --ink: #3b3a35;
+}
+
+/* The convex cap sits inside the darker well and sinks when pressed. */
+.key-cap {
+  position: absolute;
+  inset: 4px 4px 7px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 30%, var(--cap-hi), transparent 75%),
+    linear-gradient(180deg, var(--cap) 0%, var(--cap-lo) 100%);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.45),
+    inset 0 -2px 3px rgb(0 0 0 / 0.18),
+    0 3px 0 rgb(0 0 0 / 0.28),
+    0 4px 6px rgb(0 0 0 / 0.35);
+  transition: transform 70ms ease-out, box-shadow 70ms ease-out, filter 70ms;
+}
+
+.key:active .key-cap,
+.key[data-active] .key-cap {
+  transform: translateY(3px);
+  filter: brightness(0.94);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.3),
+    inset 0 -1px 2px rgb(0 0 0 / 0.2),
+    0 0 0 rgb(0 0 0 / 0.28),
+    0 1px 2px rgb(0 0 0 / 0.35);
+}
+
+.key:focus-visible {
+  outline: 3px solid #ffd27a;
+  outline-offset: -3px;
+  z-index: 1;
+}
+
+.key-label {
+  font-size: clamp(1.15rem, 6vw, 1.55rem);
+  line-height: 1;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.15);
+}
+.key-cream .key-label {
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.8);
+}
+.key-orange .key-label {
+  text-shadow: 0 -1px 0 rgb(120 40 0 / 0.35);
+}
+
+.key-icon {
+  width: clamp(1.3rem, 6.5vw, 1.7rem);
+  height: auto;
+}
