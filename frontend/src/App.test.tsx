@@ -40,12 +40,12 @@ describe('App', () => {
     const { press, value, played } = setup()
 
     await press('2', 'plus', '3', 'times', '4')
-    expect(screen.getByText('2 + 3 × 4')).toBeInTheDocument()
+    expect(screen.getByLabelText('Expression: 2 + 3 × 4')).toBeInTheDocument()
     expect(value()).toBe('4')
 
     await press('equals')
     await waitFor(() => expect(value()).toBe('14'))
-    expect(screen.getByText('2 + 3 × 4 =')).toBeInTheDocument()
+    expect(screen.getByLabelText('Expression: 2 + 3 × 4 =')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(played).toEqual(['digit', 'operator', 'digit', 'operator', 'digit', 'equals'])
   })
@@ -70,7 +70,7 @@ describe('App', () => {
     await press('2', 'plus', '3', 'times', 'equals')
     await waitFor(() => expect(value()).toBe('5'))
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(screen.getByText('2 + 3 =')).toBeInTheDocument()
+    expect(screen.getByLabelText('Expression: 2 + 3 =')).toBeInTheDocument()
   })
 
   it('blinks the shown result on a repeated equals, without another request', async () => {
@@ -250,6 +250,44 @@ describe('App', () => {
       await press('equals')
       await waitFor(() => expect(value()).toBe('5'))
       expect(calls).toBe(2)
+    })
+  })
+
+  describe('copy and paste', () => {
+    const pasteText = (text: string) => {
+      const event = new Event('paste', { bubbles: true, cancelable: true }) as ClipboardEvent
+      Object.defineProperty(event, 'clipboardData', { value: { getData: () => text } })
+      act(() => {
+        window.dispatchEvent(event)
+      })
+    }
+
+    it('types pasted text into the calculator', async () => {
+      mockApi({ '2 + 3 × 4': 14 })
+      const { press, value } = setup()
+      pasteText('2+3*4')
+      expect(screen.getByLabelText('Expression: 2 + 3 × 4')).toBeInTheDocument()
+      await press('equals')
+      await waitFor(() => expect(value()).toBe('14'))
+    })
+
+    it('refuses text that is not a calculation', async () => {
+      setup()
+      pasteText('drop table')
+      expect(await screen.findByText("That isn't a calculation")).toBeInTheDocument()
+      expect(screen.queryByLabelText(/Expression:/)).not.toBeInTheDocument()
+    })
+
+    it('copies the whole expression when nothing is selected', async () => {
+      const { press } = setup()
+      await press('2', 'plus', '3')
+      let copied = ''
+      const event = new Event('copy', { bubbles: true, cancelable: true }) as ClipboardEvent
+      Object.defineProperty(event, 'clipboardData', { value: { setData: (_: string, v: string) => (copied = v) } })
+      act(() => {
+        window.dispatchEvent(event)
+      })
+      expect(copied).toBe('2 + 3')
     })
   })
 

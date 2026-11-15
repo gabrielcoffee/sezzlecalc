@@ -284,16 +284,19 @@ export interface DisplayModel {
   main: { kind: 'number'; value: number } | { kind: 'typed'; text: string } | { kind: 'error' }
   /** Small line above it. */
   expression: string
+  /** True while the user is building input (as opposed to a shown result). */
+  live: boolean
 }
 
 export function display(state: CalcState): DisplayModel {
   if (state.error !== null) {
-    return { main: { kind: 'error' }, expression: state.lastExpression ?? '' }
+    return { main: { kind: 'error' }, expression: state.lastExpression ?? '', live: false }
   }
   if (state.tokens.length === 0) {
     return {
       main: { kind: 'number', value: state.result ?? 0 },
       expression: state.lastExpression ? `${state.lastExpression} =` : '',
+      live: false,
     }
   }
   const lastNum = state.tokens.findLast((t) => t.kind === 'num')
@@ -304,5 +307,46 @@ export function display(state: CalcState): DisplayModel {
         ? { kind: 'number', value: lastNum.value }
         : { kind: 'typed', text: (lastNum.negative ? '-' : '') + lastNum.text }
   }
-  return { main, expression: serialize(state.tokens) }
+  return { main, expression: serialize(state.tokens), live: true }
+}
+
+// ---- paste ----
+
+const PASTE_MAP: Record<string, Action> = {
+  '.': { type: 'decimal' },
+  ',': { type: 'decimal' },
+  '+': { type: 'operator', op: '+' },
+  '-': { type: 'operator', op: '−' },
+  '−': { type: 'operator', op: '−' },
+  '*': { type: 'operator', op: '×' },
+  '×': { type: 'operator', op: '×' },
+  x: { type: 'operator', op: '×' },
+  X: { type: 'operator', op: '×' },
+  '/': { type: 'operator', op: '÷' },
+  '÷': { type: 'operator', op: '÷' },
+  '^': { type: 'operator', op: '^' },
+  '%': { type: 'percent' },
+  '(': { type: 'lparen' },
+  ')': { type: 'rparen' },
+  '√': { type: 'sqrt' },
+}
+
+/**
+ * Turns pasted text into key presses. Returns null if the text contains
+ * anything that isn't calculator input (letters, other symbols), so nothing
+ * invalid can get in. The presses then go through the same reducer as typing,
+ * which refuses any out-of-place key; the input can't end up malformed.
+ * A trailing " =" (as copied from the display) is ignored.
+ */
+export function actionsFromText(text: string): Action[] | null {
+  const source = text.trim().replace(/\s*=\s*$/, '').replaceAll('sqrt', '√')
+  if (source.length === 0 || source.length > MAX_EXPRESSION_LENGTH) return null
+  const actions: Action[] = []
+  for (const ch of source) {
+    if (/\s/.test(ch)) continue
+    if (ch >= '0' && ch <= '9') actions.push({ type: 'digit', digit: ch })
+    else if (PASTE_MAP[ch]) actions.push(PASTE_MAP[ch])
+    else return null
+  }
+  return actions
 }

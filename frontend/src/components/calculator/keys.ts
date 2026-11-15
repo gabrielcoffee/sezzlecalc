@@ -60,7 +60,7 @@ export const KEY_ROWS: KeyDef[][] = [
   ],
   [
     digit('0'),
-    { id: 'decimal', label: '.', aria: 'decimal point', variant: 'gray', sound: 'digit', action: { type: 'decimal' } },
+    { id: 'decimal', label: '.', aria: 'decimal point', variant: 'gray', symbol: true, sound: 'digit', action: { type: 'decimal' } },
     { id: 'equals', label: '=', aria: 'equals', variant: 'cream', symbol: true, sound: 'equals', action: 'evaluate' },
     { id: 'add', label: '+', aria: 'plus', variant: 'cream', symbol: true, sound: 'operator', action: { type: 'operator', op: '+' } },
   ],

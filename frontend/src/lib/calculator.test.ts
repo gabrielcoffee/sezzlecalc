@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  actionsFromText,
   display,
   initialState,
   MAX_CELLS,
@@ -244,7 +245,7 @@ describe('evaluation lifecycle', () => {
 
 describe('display', () => {
   it('shows 0 on start', () => {
-    expect(display(initialState)).toEqual({ main: { kind: 'number', value: 0 }, expression: '' })
+    expect(display(initialState)).toEqual({ main: { kind: 'number', value: 0 }, expression: '', live: false })
   })
 
   it('shows the number being typed, with sign', () => {
@@ -253,6 +254,10 @@ describe('display', () => {
 
   it('keeps showing the last number after an operator', () => {
     expect(display(keys('2+35*')).main).toEqual({ kind: 'typed', text: '35' })
+  })
+
+  it('is live while typing', () => {
+    expect(display(keys('2+3')).live).toBe(true)
   })
 
   it('shows 0 when no number was typed yet', () => {
@@ -267,6 +272,7 @@ describe('display', () => {
     expect(display({ ...initialState, result: 14, lastExpression: '2 + 3 × 4' })).toEqual({
       main: { kind: 'number', value: 14 },
       expression: '2 + 3 × 4 =',
+      live: false,
     })
   })
 
@@ -274,6 +280,42 @@ describe('display', () => {
     expect(display({ ...initialState, error: 'x', lastExpression: '1 ÷ 0' })).toEqual({
       main: { kind: 'error' },
       expression: '1 ÷ 0',
+      live: false,
     })
+  })
+})
+
+describe('actionsFromText (paste)', () => {
+  const pasted = (text: string, start: CalcState = initialState) => {
+    const actions = actionsFromText(text)
+    if (!actions) return null
+    return expr(actions.reduce(reduce, start))
+  }
+
+  it.each([
+    ['2+3*4', '2 + 3 × 4'],
+    ['2 + 3 × 4', '2 + 3 × 4'],
+    ['(1.5 - 2) / 4', '(1.5 − 2) ÷ 4'],
+    ['2^10', '2 ^ 10'],
+    ['√9 + sqrt(16)', '√9 + √(16)'],
+    ['50%', '50%'],
+    ['3,5 x 2', '3.5 × 2'],
+    ['2 + 3 =', '2 + 3'], // as copied from the display after a result
+    ['2(3)', '2 × (3)'], // implicit × added, like typing
+    ['2++3', '2 + 3'], // operator replaced, like typing
+    ['())(5', '((5'], // the two out-of-place ) are skipped
+  ])('%s → %s', (text, want) => {
+    expect(pasted(text)).toBe(want)
+  })
+
+  it.each([['abc'], ['2 + a'], ['1e21'], ['2 & 3'], ['<script>'], [''], ['   '], ['1'.repeat(300)]])(
+    'refuses %s',
+    (text) => {
+      expect(actionsFromText(text)).toBeNull()
+    },
+  )
+
+  it('never produces a number longer than the display', () => {
+    expect(pasted('1'.repeat(20))).toBe('1'.repeat(MAX_CELLS))
   })
 })

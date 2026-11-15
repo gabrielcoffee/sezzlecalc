@@ -4,7 +4,15 @@ import type { KeyDef } from '@/components/calculator/keys'
 import { useSound } from '@/hooks/use-sound'
 import { AnswerCache, isDefinitive } from '@/lib/answer-cache'
 import { ApiError, evaluateExpression } from '@/lib/api'
-import { display, initialState, prepare, reduce, type Action, type CalcState } from '@/lib/calculator'
+import {
+  actionsFromText,
+  display,
+  initialState,
+  prepare,
+  reduce,
+  type Action,
+  type CalcState,
+} from '@/lib/calculator'
 
 interface Options {
   onResult?: (expression: string, result: number) => void
@@ -188,5 +196,26 @@ export function useCalculator({ onResult, seed = [] }: Options = {}) {
     [apply, play, reject],
   )
 
-  return { state, view: display(state), press, insert, rejections, flashes }
+  /**
+   * Pasted text is typed in key by key. Text with anything that isn't
+   * calculator input is refused whole; keys out of place are skipped by the
+   * reducer, so the input stays valid.
+   */
+  const paste = useCallback(
+    (text: string) => {
+      const actions = actionsFromText(text)
+      if (!actions) {
+        reject()
+        toast.error("That isn't a calculation")
+        return
+      }
+      let accepted = 0
+      for (const action of actions) if (apply(action)) accepted++
+      if (accepted > 0) play('select')
+      else reject()
+    },
+    [apply, play, reject],
+  )
+
+  return { state, view: display(state), press, insert, paste, rejections, flashes }
 }

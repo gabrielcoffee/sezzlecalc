@@ -1,4 +1,5 @@
 import { MotionConfig } from 'motion/react'
+import { toast } from 'sonner'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Calculator } from '@/components/calculator/Calculator'
 import { KEYS_BY_ID, type KeyDef } from '@/components/calculator/keys'
@@ -49,6 +50,33 @@ function Page() {
     [onPress],
   )
   useKeyboard(onKeyboard, !historyOpen)
+
+  // Paste anywhere types the clipboard into the calculator. Copy with nothing
+  // selected copies the whole expression; a selection copies as usual.
+  const { paste } = calc
+  const expression = calc.view.expression.replace(/ =$/, '')
+  useEffect(() => {
+    if (historyOpen) return
+    const onPaste = (e: ClipboardEvent) => {
+      const text = e.clipboardData?.getData('text/plain')
+      if (text === undefined) return
+      e.preventDefault()
+      paste(text)
+    }
+    const onCopy = (e: ClipboardEvent) => {
+      const selection = document.getSelection()
+      if ((selection && !selection.isCollapsed) || !expression) return
+      e.preventDefault()
+      e.clipboardData?.setData('text/plain', expression)
+      toast('Expression copied')
+    }
+    window.addEventListener('paste', onPaste)
+    window.addEventListener('copy', onCopy)
+    return () => {
+      window.removeEventListener('paste', onPaste)
+      window.removeEventListener('copy', onCopy)
+    }
+  }, [historyOpen, paste, expression])
 
   const setOpen = (open: boolean) => {
     if (open) setHistoryOpenedAt(new Date())

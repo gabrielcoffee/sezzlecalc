@@ -94,6 +94,13 @@
 .kc-symbol-negate {
   font-size: 1.5em;
 }
+.kc-symbol-decimal {
+  font-size: 2.6em;
+  font-weight: 400;
+  line-height: 0.5;
+  position: relative;
+  top: -0.2em; /* the dot sits on the baseline; lift it just below centre */
+}
 
 /* Pressed: cap moves down 1.5px, contact shadow tightens, face darkens. No scale. */
 .kc-well:active .kc-cap,
