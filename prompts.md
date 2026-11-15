@@ -396,6 +396,29 @@ oh and the silver pad and title shouold be aligned. the pad between exactly same
 
 Attached image: a plain warm-cream plastic texture.
 
+## Prompt 24 — Typing motion, copy/paste, concentric corners
+
+- **Start:** 2026-11-15 12:20:36
+- **End:** 2026-11-15 12:24:03
+- **Active:** 3m 27s
+- **Outcome:** Typing glide + fade-in on display and expression line; panel close smoothed (backdrop had been vanishing after 100 ms); concentric corners via outer = inner + gap (27 px = 5 + 22); bigger decimal point; expression line copy/paste with press-and-hold arrows and no scrollbar; pasted text validated (refused whole if any character isn't calculator input, out-of-place keys skipped). 195 frontend tests. Redeployed. Estimated Plan 3 at ~15–20 min.
+
+```text
+add motion design when typing, instead of instantly showing the number or operation selected it shows what is currently typed moves to the left and the most recent typed shows in a very quick fade in to the left on the rigth edge
+
+the close history animation is laggy, it seems, too quick?
+
+make corners of the calculator match the corners on the keyboard whole part, which is less rounded, there is a calculation to make to make sure nested rounded corners are a match find it, apple uses it
+
+increase size of the . icon too
+
+let the user copy and paste expressions on the expression line also don't show a bar to scroll there, just add some minimalistic buttons on the left and right of the expr line to indicate and the user can click and hold to move left and right
+
+make sure anything pasted can't be invalid digits or characters
+
+after this frontend is approved how long would take the last plan?
+```
+
 ---
 
 ## Breaks
@@ -408,10 +431,10 @@ Attached image: a plain warm-cream plastic texture.
 ## Totals
 
 Elapsed is wall-clock time from the first prompt minus breaks:
-17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 12:12:54 (1h 17m 02s).
+17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 12:24:03 (1h 28m 11s).
 
 | Measure | Time |
 |---------|------|
-| Elapsed, breaks excluded (as of 2026-11-15 12:12:54) | 3h 10m 51s |
-| Active, measured (prompts 6, 14, 17–23) | 45m 06s |
+| Elapsed, breaks excluded (as of 2026-11-15 12:24:03) | 3h 22m 00s |
+| Active, measured (prompts 6, 14, 17–24) | 48m 33s |
 | Budget | 2h target, 4h ceiling |
