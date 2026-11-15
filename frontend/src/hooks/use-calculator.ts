@@ -11,12 +11,14 @@ interface Options {
 
 /**
  * Connects the pure calculator reducer to the API, sounds and toasts.
- * `rejections` increments on every refused key press so the UI can shake.
+ * `rejections` increments on every refused key press so the UI can shake the
+ * number; `flashes` increments when a result shows so the UI can blink it.
  */
 export function useCalculator({ onResult }: Options = {}) {
   const { play } = useSound()
   const [state, setState] = useState<CalcState>(initialState)
   const [rejections, setRejections] = useState(0)
+  const [flashes, setFlashes] = useState(0)
 
   // The ref always holds the latest state, so handlers never act on a stale copy.
   const stateRef = useRef(state)
@@ -43,8 +45,14 @@ export function useCalculator({ onResult }: Options = {}) {
     const prepared = prepare(stateRef.current)
     if (!prepared.ok) {
       if (prepared.reason === 'pending') return // a request is already running
+      if (prepared.reason === 'empty') {
+        // Nothing new to calculate, e.g. "=" again on a shown result: blink it.
+        play('equals')
+        setFlashes((n) => n + 1)
+        return
+      }
       reject()
-      if (prepared.reason === 'too-long') toast.error('The expression is too long')
+      toast.error('The expression is too long')
       return
     }
 
@@ -56,6 +64,7 @@ export function useCalculator({ onResult }: Options = {}) {
     try {
       const result = await evaluateExpression(expression, { signal: controller.signal })
       apply({ type: 'evaluate-success', expression, result })
+      setFlashes((n) => n + 1)
       onResultRef.current?.(expression, result)
     } catch (err) {
       if (controller.signal.aborted) return // cleared by the user
@@ -96,5 +105,5 @@ export function useCalculator({ onResult }: Options = {}) {
     [apply, play, reject],
   )
 
-  return { state, view: display(state), press, insert, rejections }
+  return { state, view: display(state), press, insert, rejections, flashes }
 }

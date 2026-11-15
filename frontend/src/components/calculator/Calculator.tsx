@@ -21,7 +21,7 @@ export function Calculator({ calc, activeKey, onPress }: Props) {
       transition={{ type: 'spring', stiffness: 160, damping: 22 }}
     >
       <div className="calc-ridges" aria-hidden="true" />
-      <Display view={calc.view} rejections={calc.rejections} />
+      <Display view={calc.view} rejections={calc.rejections} flashes={calc.flashes} />
       <div className="nameplate" aria-hidden="true">
         <span>SZLCALC</span> <strong>903</strong>
       </div>

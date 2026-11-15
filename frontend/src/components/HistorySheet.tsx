@@ -8,6 +8,7 @@ import { groupByDay, type HistoryEntry } from '@/hooks/use-history'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { formatFull } from '@/lib/format'
 import { loadJSON, saveJSON } from '@/lib/storage'
+import { blurIfPointer } from '@/lib/utils'
 
 interface Props {
   open: boolean
@@ -78,6 +79,9 @@ export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, 
       <SheetContent
         side={desktop ? 'right' : 'bottom'}
         aria-describedby={undefined}
+        // Don't hand focus back to the History button on close: a focused
+        // button would catch Enter meant for "=".
+        onCloseAutoFocus={(e) => e.preventDefault()}
         className="history-sheet flex flex-col gap-0 p-0"
         style={desktop ? { width: current, maxWidth: 'none' } : { height: current, maxHeight: 'none' }}
       >
@@ -138,7 +142,15 @@ export function HistorySheet({ open, openedAt, onOpenChange, entries, onSelect, 
         </ScrollArea>
 
         <SheetFooter className="border-t border-border/60 px-5 py-4">
-          <Button variant="ghost" className="skeuo-button w-full" onClick={onClear} disabled={entries.length === 0}>
+          <Button
+            variant="outline"
+            className="chrome-button w-full"
+            onClick={(e) => {
+              blurIfPointer(e)
+              onClear()
+            }}
+            disabled={entries.length === 0}
+          >
             <TrashIcon />
             Clear history
           </Button>

@@ -10,8 +10,15 @@ export function useKeyboard(onKey: (id: string) => void, enabled = true) {
       if (e.target instanceof HTMLElement && e.target.closest('input, textarea, [contenteditable="true"]')) return
       const id = KEYBOARD_MAP[e.key]
       if (!id) return
-      // Stops Enter from also clicking a focused button, "/" from opening
-      // quick find, and Backspace from navigating back.
+      // Mouse clicks drop focus, so a focused button means the user tabbed
+      // to it: Enter activates that button. Any other key clears the focus
+      // ring so it doesn't linger on a button while typing.
+      const active = document.activeElement
+      if (active instanceof HTMLButtonElement) {
+        if (e.key === 'Enter') return
+        active.blur()
+      }
+      // Stops "/" from opening quick find and Backspace from navigating back.
       e.preventDefault()
       onKey(id)
     }

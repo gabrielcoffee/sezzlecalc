@@ -64,6 +64,11 @@ func TestEvaluate(t *testing.T) {
 		{"10 ÷ 4", 2.5},
 		{"10 − 3", 7},
 
+		// 11-digit operands, the frontend's display limit, stay exact
+		{"99999999999 + 1", 100000000000},
+		{"-99999999999 × 2", -199999999998},
+		{"12345678901 ÷ 1", 12345678901},
+
 		// rounding happens once at the end
 		{"0.1 + 0.2", 0.3},
 		{"1 / 3 * 3", 1},

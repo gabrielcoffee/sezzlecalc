@@ -1,6 +1,7 @@
 import { SpeakerIcon, TapeRollIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { useSound } from '@/hooks/use-sound'
+import { blurIfPointer } from '@/lib/utils'
 
 interface Props {
   historyCount: number
@@ -15,8 +16,11 @@ export function TopBar({ historyCount, onOpenHistory }: Props) {
       <div className="justify-self-start">
         <Button
           variant="ghost"
-          className="skeuo-button"
-          onClick={toggle}
+          className="chrome-button"
+          onClick={(e) => {
+            blurIfPointer(e)
+            toggle()
+          }}
           aria-pressed={enabled}
           aria-label={enabled ? 'Mute sound' : 'Turn sound on'}
           title={enabled ? 'Sound on' : 'Sound off'}
@@ -31,11 +35,19 @@ export function TopBar({ historyCount, onOpenHistory }: Props) {
       </h1>
 
       <div className="justify-self-end">
-        <Button variant="ghost" className="skeuo-button" onClick={onOpenHistory} aria-label="Open history">
+        <Button
+          variant="ghost"
+          className="chrome-button"
+          onClick={(e) => {
+            blurIfPointer(e)
+            onOpenHistory()
+          }}
+          aria-label="Open history"
+        >
           <TapeRollIcon />
           <span className="hidden sm:inline">History</span>
           {historyCount > 0 && (
-            <span className="skeuo-badge" aria-hidden="true">
+            <span className="chrome-badge" aria-hidden="true">
               {historyCount}
             </span>
           )}

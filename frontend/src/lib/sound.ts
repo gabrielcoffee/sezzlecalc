@@ -28,38 +28,37 @@ interface Click {
   body?: number // gain of the low thump (0 or missing: none)
 }
 
-/** Press plus a quieter, slightly brighter release about 70 ms later. */
+/** Press plus a quieter release about 70 ms later. Soft: low gain, mellow tone. */
 const keystroke = (tone: number, gain: number, body: number): Click[] => [
-  { tone, decay: 0.018, gain, body },
-  { delay: 0.07, tone: tone * 1.25, decay: 0.012, gain: gain * 0.45 },
+  { tone, decay: 0.025, gain, body },
+  { delay: 0.07, tone: tone * 1.15, decay: 0.016, gain: gain * 0.4 },
 ]
 
 const RECIPES: Record<SoundName, Click[]> = {
-  digit: keystroke(3400, 0.5, 0.25),
-  operator: keystroke(2700, 0.55, 0.35),
-  function: keystroke(3000, 0.5, 0.3),
-  backspace: keystroke(3100, 0.45, 0.25),
-  select: keystroke(3600, 0.4, 0.2),
-  // Bigger keys: deeper and heavier.
-  equals: keystroke(2200, 0.65, 0.5),
+  digit: keystroke(2000, 0.2, 0.08),
+  operator: keystroke(1700, 0.22, 0.1),
+  function: keystroke(1850, 0.2, 0.09),
+  backspace: keystroke(1900, 0.18, 0.08),
+  select: keystroke(2100, 0.16, 0.06),
+  equals: keystroke(1450, 0.24, 0.14), // bigger key: a little deeper
   clear: [
-    { tone: 2000, q: 1.2, decay: 0.03, gain: 0.6, body: 0.5 },
-    { delay: 0.09, tone: 2600, decay: 0.015, gain: 0.3 },
+    { tone: 1300, q: 0.8, decay: 0.035, gain: 0.24, body: 0.14 },
+    { delay: 0.09, tone: 1600, decay: 0.02, gain: 0.1 },
   ],
   // A dull, damped double knock.
   error: [
-    { tone: 900, q: 0.8, decay: 0.05, gain: 0.6, body: 0.6 },
-    { delay: 0.11, tone: 800, q: 0.8, decay: 0.06, gain: 0.55, body: 0.6 },
+    { tone: 700, q: 0.7, decay: 0.05, gain: 0.28, body: 0.2 },
+    { delay: 0.11, tone: 620, q: 0.7, decay: 0.06, gain: 0.24, body: 0.2 },
   ],
-  reject: [{ tone: 1100, q: 0.9, decay: 0.03, gain: 0.45, body: 0.4 }],
-  // A slide switch: two sharp snaps close together.
+  reject: [{ tone: 850, q: 0.7, decay: 0.035, gain: 0.2, body: 0.12 }],
+  // A slide switch: two soft snaps close together.
   toggle: [
-    { tone: 4200, q: 3, decay: 0.01, gain: 0.5 },
-    { delay: 0.025, tone: 3000, q: 2, decay: 0.014, gain: 0.4, body: 0.2 },
+    { tone: 2600, q: 1.4, decay: 0.014, gain: 0.18 },
+    { delay: 0.025, tone: 2000, q: 1.2, decay: 0.018, gain: 0.15, body: 0.06 },
   ],
-  // Paper tape sliding: soft and airy.
-  open: [{ tone: 1800, q: 0.5, decay: 0.09, gain: 0.25 }],
-  close: [{ tone: 1400, q: 0.5, decay: 0.07, gain: 0.22 }],
+  // Paper tape sliding: airy.
+  open: [{ tone: 1400, q: 0.5, decay: 0.09, gain: 0.12 }],
+  close: [{ tone: 1100, q: 0.5, decay: 0.07, gain: 0.1 }],
 }
 
 type ContextFactory = () => AudioContext | null
@@ -119,7 +118,7 @@ function schedule(ctx: AudioContext, noise: AudioBuffer, click: Click, now: numb
   const filter = ctx.createBiquadFilter()
   filter.type = 'bandpass'
   filter.frequency.setValueAtTime(click.tone * vary, start)
-  filter.Q.setValueAtTime(click.q ?? 1.6, start)
+  filter.Q.setValueAtTime(click.q ?? 1, start)
   const gain = ctx.createGain()
   envelope(gain, click.gain, start, end)
   src.connect(filter).connect(gain).connect(ctx.destination)
@@ -140,9 +139,9 @@ function schedule(ctx: AudioContext, noise: AudioBuffer, click: Click, now: numb
   }
 }
 
-/** Near-instant attack, exponential decay: no audible pops at either end. */
+/** Short soft attack, exponential decay: no audible pops at either end. */
 function envelope(node: GainNode, peak: number, start: number, end: number) {
   node.gain.setValueAtTime(0.0001, start)
-  node.gain.exponentialRampToValueAtTime(peak, start + 0.001)
+  node.gain.exponentialRampToValueAtTime(peak, start + 0.003)
   node.gain.exponentialRampToValueAtTime(0.0001, end)
 }

@@ -1,17 +1,18 @@
 import { useAnimate, useReducedMotion } from 'motion/react'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { DisplayModel } from '@/lib/calculator'
-import { DISPLAY_DIGITS, formatDisplay } from '@/lib/format'
+import { DISPLAY_CELLS, formatDisplay } from '@/lib/format'
 
 interface Props {
   view: DisplayModel
-  /** Changes on every refused input; triggers a shake. */
+  /** Changes on every refused key press; shakes the number. */
   rejections: number
+  /** Changes on every result (and on "=" with nothing new); blinks the number. */
+  flashes: number
 }
 
 // Unlit segments drawn behind the lit ones, as on a real 7-segment display.
-// One extra cell for a leading minus sign.
-const GHOST = '8.'.repeat(DISPLAY_DIGITS + 1)
+const GHOST = '8.'.repeat(DISPLAY_CELLS)
 
 function mainText(main: DisplayModel['main']): string {
   switch (main.kind) {
@@ -24,15 +25,20 @@ function mainText(main: DisplayModel['main']): string {
   }
 }
 
-export function Display({ view, rejections }: Props) {
-  const [scope, animate] = useAnimate()
+export function Display({ view, rejections, flashes }: Props) {
+  const [value, animate] = useAnimate<HTMLSpanElement>()
   const reduceMotion = useReducedMotion()
   const expressionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (rejections === 0 || reduceMotion) return
-    animate(scope.current, { x: [0, -7, 6, -4, 3, 0] }, { duration: 0.32, ease: 'easeOut' })
-  }, [rejections, reduceMotion, animate, scope])
+    animate(value.current, { x: [0, -7, 6, -4, 3, 0] }, { duration: 0.3, ease: 'easeOut' })
+  }, [rejections, reduceMotion, animate, value])
+
+  useEffect(() => {
+    if (flashes === 0) return
+    animate(value.current, { opacity: [0.2, 1] }, { duration: 0.12, ease: 'easeOut' })
+  }, [flashes, animate, value])
 
   // Keep the end of a long expression in view as it grows; the user can
   // scroll back to see the start.
@@ -44,7 +50,7 @@ export function Display({ view, rejections }: Props) {
   const text = mainText(view.main)
 
   return (
-    <div ref={scope} className="calc-display">
+    <div className="calc-display">
       <div
         ref={expressionRef}
         className="display-expression"
@@ -57,7 +63,7 @@ export function Display({ view, rejections }: Props) {
         <span className="display-ghost" aria-hidden="true">
           {GHOST}
         </span>
-        <span className="display-value" aria-hidden="true" data-testid="display-value">
+        <span ref={value} className="display-value" aria-hidden="true" data-testid="display-value">
           {text}
         </span>
       </div>

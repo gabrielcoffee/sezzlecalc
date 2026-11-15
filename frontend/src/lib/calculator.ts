@@ -46,8 +46,8 @@ export type Action =
   | { type: 'evaluate-success'; expression: string; result: number }
   | { type: 'evaluate-error'; expression: string; message: string }
 
-/** Digits per number, matching the 10-digit display. */
-export const MAX_DIGITS = 10
+/** Display cells per number: digits plus a minus sign, as on the 11-cell display. */
+export const MAX_CELLS = 11
 /** The API rejects longer expressions. */
 export const MAX_EXPRESSION_LENGTH = 256
 
@@ -117,7 +117,7 @@ function edit(tokens: Token[], action: Action): Token[] | null {
   switch (action.type) {
     case 'digit': {
       if (last?.kind === 'num') {
-        if (last.value !== undefined || digitCount(last.text) >= MAX_DIGITS) return null
+        if (last.value !== undefined || numberCells(last) >= MAX_CELLS) return null
         const text = last.text === '0' ? action.digit : last.text + action.digit
         return [...before, { ...last, text }]
       }
@@ -154,8 +154,12 @@ function edit(tokens: Token[], action: Action): Token[] | null {
     case 'percent':
       return endsWithValue(tokens) ? [...tokens, { kind: 'pct' }] : null
 
-    case 'negate':
-      return last?.kind === 'num' ? [...before, { ...last, negative: !last.negative }] : null
+    case 'negate': {
+      if (last?.kind !== 'num') return null
+      // A typed number using every cell has no room left for the minus sign.
+      if (!last.negative && last.value === undefined && numberCells(last) >= MAX_CELLS) return null
+      return [...before, { ...last, negative: !last.negative }]
+    }
 
     case 'backspace': {
       if (last === undefined) return []
@@ -195,8 +199,9 @@ export function openParens(tokens: Token[]): number {
   return open
 }
 
-function digitCount(text: string): number {
-  return text.replace('.', '').length
+/** Cells a typed number takes on the display: digits plus the minus sign. */
+function numberCells(t: Extract<Token, { kind: 'num' }>): number {
+  return t.text.replace('.', '').length + (t.negative ? 1 : 0)
 }
 
 export function valueToken(value: number): Token {

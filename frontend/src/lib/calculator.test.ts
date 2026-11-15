@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   display,
   initialState,
-  MAX_DIGITS,
+  MAX_CELLS,
   prepare,
   reduce,
   serialize,
@@ -70,13 +70,24 @@ describe('building expressions', () => {
     expect(expr(keys(input))).toBe(want)
   })
 
-  it('caps a number at the display width', () => {
-    const s = keys('1'.repeat(MAX_DIGITS + 3))
-    expect(expr(s)).toBe('1'.repeat(MAX_DIGITS))
+  it('caps a number at the 11 display cells', () => {
+    const s = keys('1'.repeat(MAX_CELLS + 3))
+    expect(expr(s)).toBe('1'.repeat(MAX_CELLS))
   })
 
-  it('does not count the decimal point toward the digit cap', () => {
-    expect(expr(keys('1234567890.1'))).toBe('1234567890.')
+  it('does not count the decimal point toward the cap', () => {
+    expect(expr(keys('12345678901.1'))).toBe('12345678901.')
+    expect(expr(keys('1234567890.1'))).toBe('1234567890.1')
+  })
+
+  it('counts the minus sign as a cell', () => {
+    expect(display(keys('1n' + '2'.repeat(12))).main).toEqual({ kind: 'typed', text: '-1' + '2'.repeat(9) })
+  })
+
+  it('refuses ± when the number already fills every cell', () => {
+    const full = keys('1'.repeat(MAX_CELLS))
+    expect(reduce(full, toAction('n'))).toBe(full)
+    expect(expr(keys('b' + 'n', full))).toBe('(−' + '1'.repeat(MAX_CELLS - 1) + ')')
   })
 })
 

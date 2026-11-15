@@ -72,12 +72,37 @@ describe('App', () => {
     expect(screen.getByText('2 + 3 =')).toBeInTheDocument()
   })
 
+  it('blinks the shown result on a repeated equals, without another request', async () => {
+    const fetchMock = mockApi({ '6 × 7': 42 })
+    const { press, value, played } = setup()
+    await press('6', 'times', '7', 'equals')
+    await waitFor(() => expect(value()).toBe('42'))
+
+    await press('equals')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(value()).toBe('42')
+    expect(played.at(-1)).toBe('equals')
+    expect(played).not.toContain('reject')
+  })
+
+  it('does not leave focus on a clicked key', async () => {
+    const { press } = setup()
+    await press('7')
+    expect(document.activeElement).toBe(document.body)
+  })
+
+  it('accepts 11 digits, the full display', async () => {
+    const { press, value } = setup()
+    await press(...'123456789012'.split(''))
+    expect(value()).toBe('12345678901')
+  })
+
   it('does nothing on equals with nothing to calculate', async () => {
     const fetchMock = mockApi({})
     const { press, played } = setup()
     await press('square root', 'equals')
     expect(fetchMock).not.toHaveBeenCalled()
-    expect(played.at(-1)).toBe('reject')
+    expect(played).not.toContain('reject')
   })
 
   it('plays the reject sound for refused keys', async () => {

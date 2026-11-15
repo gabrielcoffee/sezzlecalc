@@ -1,5 +1,6 @@
 import { Delete } from 'lucide-react'
 import { motion } from 'motion/react'
+import { blurIfPointer } from '@/lib/utils'
 import { KEY_ROWS, type KeyDef } from './keys'
 
 interface Props {
@@ -18,7 +19,10 @@ export function Keypad({ onPress, activeKey }: Props) {
           className={`key key-${key.variant}`}
           aria-label={key.aria}
           data-active={activeKey === key.id || undefined}
-          onClick={() => onPress(key)}
+          onClick={(e) => {
+            blurIfPointer(e)
+            onPress(key)
+          }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: 'spring', stiffness: 700, damping: 30 }}
         >
