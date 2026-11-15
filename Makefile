@@ -5,7 +5,7 @@ FRONTEND := frontend
 # otherwise the Node on PATH is used.
 NODE := if [ -s "$$HOME/.nvm/nvm.sh" ]; then . "$$HOME/.nvm/nvm.sh" >/dev/null && nvm use --silent >/dev/null 2>&1; fi;
 
-.PHONY: install dev run web test test-backend test-frontend cover fuzz lint build
+.PHONY: install dev run web test test-backend test-frontend cover fuzz lint build docker docker-run
 
 ## install: install frontend dependencies (Go fetches its own on first build)
 install:
@@ -54,3 +54,11 @@ lint:
 ## build: production frontend bundle in frontend/dist
 build:
 	cd $(FRONTEND) && $(NODE) npm run build
+
+## docker: build the single image (API + frontend)
+docker:
+	docker build -t sezzlecalc .
+
+## docker-run: run the image on http://localhost:8080
+docker-run:
+	docker run --rm -p 8080:8080 sezzlecalc

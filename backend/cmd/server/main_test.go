@@ -14,8 +14,10 @@ func TestLoadConfig(t *testing.T) {
 
 	cfg, err = loadConfig(env(map[string]string{
 		"PORT": "9000", "RATE_LIMIT_RPS": "2.5", "RATE_LIMIT_BURST": "5", "CLIENT_IP_HEADER": "X-Real-IP",
+		"STATIC_DIR": "/app/public",
 	}))
-	if err != nil || cfg != (config{port: "9000", rateRPS: 2.5, rateBurst: 5, ipHeader: "X-Real-IP"}) {
+	want := config{port: "9000", rateRPS: 2.5, rateBurst: 5, ipHeader: "X-Real-IP", staticDir: "/app/public"}
+	if err != nil || cfg != want {
 		t.Fatalf("overrides: got %+v, %v", cfg, err)
 	}
 

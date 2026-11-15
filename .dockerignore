@@ -1,0 +1,10 @@
+.git
+**/.vercel
+**/.env*
+**/node_modules
+**/.DS_Store
+frontend/dist
+frontend/coverage
+backend/coverage.out
+backend/coverage.html
+docs

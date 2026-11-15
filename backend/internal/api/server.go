@@ -17,6 +17,9 @@ type Config struct {
 	Logger *slog.Logger
 	// RateLimiter limits /api/ requests per client IP. Nil disables limiting.
 	RateLimiter *RateLimiter
+	// StaticDir, when set, is a directory with the built frontend, served for
+	// every non-API path. Empty: API only.
+	StaticDir string
 }
 
 // NewHandler returns the complete HTTP handler: routes plus middleware.
@@ -36,7 +39,12 @@ func NewHandler(cfg Config) http.Handler {
 	}
 	mux.Handle("/api/v1/sqrt", allowMethod(http.MethodPost, http.HandlerFunc(sqrtHandler)))
 	mux.Handle("/api/v1/evaluate", allowMethod(http.MethodPost, http.HandlerFunc(evaluateHandler)))
-	mux.HandleFunc("/", notFoundHandler)
+	if cfg.StaticDir != "" {
+		mux.Handle("/", staticHandler(cfg.StaticDir))
+		mux.HandleFunc("/api/", notFoundHandler) // unknown API paths stay JSON 404s
+	} else {
+		mux.HandleFunc("/", notFoundHandler)
+	}
 
 	var h http.Handler = bodyLimit(MaxBodyBytes, mux)
 	if cfg.RateLimiter != nil {

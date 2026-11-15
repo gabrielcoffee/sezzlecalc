@@ -419,6 +419,28 @@ make sure anything pasted can't be invalid digits or characters
 after this frontend is approved how long would take the last plan?
 ```
 
+## Prompt 25 — Drop typing motion and arrows, plan the last part
+
+- **Start:** 2026-11-15 12:43:06
+- **End:** 2026-11-15 12:44:47
+- **Active:** 1m 41s
+- **Outcome:** Claude wrote Plan 3 (remove the two rejected features, Go serves the frontend in Docker, Dockerfile, README, final push). Plan approval was interrupted by the next prompt.
+
+```text
+forget about the typing motion and the arrows, it's all glitched, ditch these 2 ideas and plan last part while I review
+```
+
+## Prompt 26 — Execute Plan 3
+
+- **Start:** 2026-11-15 12:44:47
+- **End:** 2026-11-15 12:49:16
+- **Active:** 4m 29s
+- **Outcome:** Typing motion, scroll arrows and keycap lab removed (live site redeployed). Go server serves the built frontend when `STATIC_DIR` is set, with a strict CSP, no directory listings, traversal-safe, tested. Three-stage Dockerfile → 16 MB distroless non-root image, verified in Chrome (zero CSP violations, `2 + 3 × 4 = 14`). README with setup, Docker, coverage, API, routes, decisions split by who made them, known limits, time. Both Vercel projects redeployed; pushed to GitHub.
+
+```text
+go summarize at the end
+```
+
 ---
 
 ## Breaks
@@ -431,10 +453,14 @@ after this frontend is approved how long would take the last plan?
 ## Totals
 
 Elapsed is wall-clock time from the first prompt minus breaks:
-17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 12:24:03 (1h 28m 11s).
+17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 12:49:16 (1h 53m 24s).
 
 | Measure | Time |
 |---------|------|
-| Elapsed, breaks excluded (as of 2026-11-15 12:24:03) | 3h 22m 00s |
-| Active, measured (prompts 6, 14, 17–24) | 48m 33s |
+| **Total, breaks excluded (final, 2026-11-15 12:49:16)** | **3h 47m 13s** |
+| Claude working, measured (prompts 6, 14, 17–26) | 54m 43s |
 | Budget | 2h target, 4h ceiling |
+
+Prompts 1–5 and 7–13 have only start stamps, so the "Claude working" figure
+undercounts; the elapsed total is the reliable number. The rest of the elapsed
+time is reading, reviewing and testing between prompts.

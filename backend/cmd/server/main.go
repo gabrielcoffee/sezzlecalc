@@ -23,11 +23,19 @@ type config struct {
 	// ipHeader names a header with the real client IP, for use behind a
 	// proxy that overwrites it (X-Real-IP on Vercel). Empty: use RemoteAddr.
 	ipHeader string
+	// staticDir, when set, holds the built frontend to serve (Docker image).
+	staticDir string
 }
 
 // loadConfig reads settings from the environment, falling back to defaults.
 func loadConfig(getenv func(string) string) (config, error) {
-	cfg := config{port: "8080", rateRPS: 10, rateBurst: 20, ipHeader: getenv("CLIENT_IP_HEADER")}
+	cfg := config{
+		port:      "8080",
+		rateRPS:   10,
+		rateBurst: 20,
+		ipHeader:  getenv("CLIENT_IP_HEADER"),
+		staticDir: getenv("STATIC_DIR"),
+	}
 	if v := getenv("PORT"); v != "" {
 		cfg.port = v
 	}
@@ -71,7 +79,7 @@ func run(logger *slog.Logger) error {
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.port,
-		Handler:           api.NewHandler(api.Config{Logger: logger, RateLimiter: limiter}),
+		Handler:           api.NewHandler(api.Config{Logger: logger, RateLimiter: limiter, StaticDir: cfg.staticDir}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

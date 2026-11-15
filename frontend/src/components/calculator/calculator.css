@@ -100,19 +100,11 @@
   container-type: inline-size; /* digits are sized from the window width */
 }
 
-.display-expression-row {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
 .display-expression {
-  /* Long expressions scroll sideways (arrows, drag, swipe or trackpad). Auto
+  /* Long expressions scroll sideways (drag, swipe or trackpad). Auto
      margin keeps short ones right-aligned without hiding the start of long
      ones. No visible scrollbar. The text can be selected and copied. */
   display: flex;
-  flex: 1;
-  min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   height: 1.15rem;
@@ -139,35 +131,6 @@
 .display-expression ::selection {
   background: rgb(255 106 31 / 0.35);
   color: #ffd2b0;
-}
-
-/* Minimal scroll arrows, only shown when there is more in that direction. */
-.display-arrow {
-  width: 0.9rem;
-  height: 1.15rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: rgb(255 140 70 / 0.8);
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-  visibility: hidden;
-  touch-action: none;
-  user-select: none;
-}
-.display-arrow[data-visible] {
-  visibility: visible;
-}
-.display-arrow:active {
-  color: #ffb27a;
-}
-
-/* One element per character so typing can animate (see TypedText). */
-.typed-char {
-  display: inline-block;
-  white-space: pre; /* keep the spaces around operators */
 }
 
 .display-main {

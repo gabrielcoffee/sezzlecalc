@@ -284,19 +284,16 @@ export interface DisplayModel {
   main: { kind: 'number'; value: number } | { kind: 'typed'; text: string } | { kind: 'error' }
   /** Small line above it. */
   expression: string
-  /** True while the user is building input (as opposed to a shown result). */
-  live: boolean
 }
 
 export function display(state: CalcState): DisplayModel {
   if (state.error !== null) {
-    return { main: { kind: 'error' }, expression: state.lastExpression ?? '', live: false }
+    return { main: { kind: 'error' }, expression: state.lastExpression ?? '' }
   }
   if (state.tokens.length === 0) {
     return {
       main: { kind: 'number', value: state.result ?? 0 },
       expression: state.lastExpression ? `${state.lastExpression} =` : '',
-      live: false,
     }
   }
   const lastNum = state.tokens.findLast((t) => t.kind === 'num')
@@ -307,7 +304,7 @@ export function display(state: CalcState): DisplayModel {
         ? { kind: 'number', value: lastNum.value }
         : { kind: 'typed', text: (lastNum.negative ? '-' : '') + lastNum.text }
   }
-  return { main, expression: serialize(state.tokens), live: true }
+  return { main, expression: serialize(state.tokens) }
 }
 
 // ---- paste ----

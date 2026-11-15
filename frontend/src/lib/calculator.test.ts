@@ -245,7 +245,7 @@ describe('evaluation lifecycle', () => {
 
 describe('display', () => {
   it('shows 0 on start', () => {
-    expect(display(initialState)).toEqual({ main: { kind: 'number', value: 0 }, expression: '', live: false })
+    expect(display(initialState)).toEqual({ main: { kind: 'number', value: 0 }, expression: '' })
   })
 
   it('shows the number being typed, with sign', () => {
@@ -254,10 +254,6 @@ describe('display', () => {
 
   it('keeps showing the last number after an operator', () => {
     expect(display(keys('2+35*')).main).toEqual({ kind: 'typed', text: '35' })
-  })
-
-  it('is live while typing', () => {
-    expect(display(keys('2+3')).live).toBe(true)
   })
 
   it('shows 0 when no number was typed yet', () => {
@@ -272,7 +268,6 @@ describe('display', () => {
     expect(display({ ...initialState, result: 14, lastExpression: '2 + 3 × 4' })).toEqual({
       main: { kind: 'number', value: 14 },
       expression: '2 + 3 × 4 =',
-      live: false,
     })
   })
 
@@ -280,7 +275,6 @@ describe('display', () => {
     expect(display({ ...initialState, error: 'x', lastExpression: '1 ÷ 0' })).toEqual({
       main: { kind: 'error' },
       expression: '1 ÷ 0',
-      live: false,
     })
   })
 })
