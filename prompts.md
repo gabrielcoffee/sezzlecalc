@@ -314,6 +314,39 @@ show about every 0.5s or 1s if the user hasn't typed the current expression is s
 fade should be 50ms
 ```
 
+## Prompt 21 — Mobile/history fixes, keycap lab
+
+- **Start:** 2026-11-15 11:42:29
+- **End:** 2026-11-15 11:47:22
+- **Active:** 4m 53s
+- **Outcome:** Phones: calculator runs to the bottom. History: phones snap between default height, full height and closed; resizing instant (shadcn's 200 ms panel transition was the lag); same motion to close as to open; toggle sound; title in button font aligned with close, no divider. Desktop calculator centred (89 px above and below). Fade bug found and fixed: with pre-calculated answers the number sometimes painted one frame at full brightness first; fade now starts before paint, 80 ms, verified frame by frame. Keycap lab built per the user's spec (3 iterations, screenshots reviewed); awaiting approval before applying to the keypad. The user's keycap prompt was itself written by Claude in another session, as the user noted.
+
+```text
+more fixes now on mobile too
+
+fill the bottom of the page with the calculator color
+history either shows the default space when the user clicks on it, or it can be pulled up to show the till the top or nothing. and when adjusting the size don't delay the list to catch up, should be instant
+
+calculator is not centered on desktop there's more spaceing on top fix
+
+i noticed sometimes the fade seems instant or non existant, check if it always happens even if i press = before the 0.5 time (should happen when we get the result)
+
+make the fade be 80ms, let me see how it looks
+
+renmove the lerp animation when closing history, keep the same as when it opens
+
+history sound effect same as the sound one
+
+keep the font size consistent between the buttons and the title when history shows, also they should be vertically aligned and remove the line between title and the list of history
+
+the days can be shown with the smaller font no problem
+
+also follow this prompt for making the keys of the calculator better in style:
+I asked claude to write it based on the original image comparing with the current result:
+
+[pasted keycap spec: rebuild key styling as a moulded plastic keycap in a recessed well; isolated test page first in orange, dark grey and cream; layers: well, superellipse keycap body, radial face curvature, top/bottom rim, short contact shadow, faint feTurbulence noise, printed legend; one light direction from the top; one keycap definition with colours from CSS variables; pressed state moves the cap down 1-2px, no scale; 2x screenshot after each change with a critical review; apply to the keypad only after approval]
+```
+
 ---
 
 ## Breaks
@@ -326,10 +359,10 @@ fade should be 50ms
 ## Totals
 
 Elapsed is wall-clock time from the first prompt minus breaks:
-17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:33:16 (37m 24s).
+17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:47:22 (51m 30s).
 
 | Measure | Time |
 |---------|------|
-| Elapsed, breaks excluded (as of 2026-11-15 11:33:16) | 2h 31m 13s |
-| Active, measured (prompts 6, 14, 17–20) | 35m 34s |
+| Elapsed, breaks excluded (as of 2026-11-15 11:47:22) | 2h 45m 19s |
+| Active, measured (prompts 6, 14, 17–21) | 40m 27s |
 | Budget | 2h target, 4h ceiling |
