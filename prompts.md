@@ -289,10 +289,29 @@ how can I test the IP rate limit?
 ## Prompt 19 — Result delay question
 
 - **Start:** 2026-11-15 11:23:48
+- **End:** 2026-11-15 11:24:15
+- **Active:** 27s
 - **Outcome:** Measured in Chrome, 12 runs each. Live: result on screen ~190 ms after the click, almost all of it the API round trip (~186 ms, the server is in the US); the fade adds ~115 ms more until full brightness. Local: request 3 ms, on screen 11 ms. Question only, no code changed.
 
 ```text
 there's is still some delay when the user clicks to see the result, is this the server or the fade effect? check how much in ms it takes to show result
+```
+
+## Prompt 20 — Pre-calculation, panel motion, UI trims
+
+- **Start:** 2026-11-15 11:31:10
+- **End:** 2026-11-15 11:33:16
+- **Active:** 2m 06s
+- **Outcome:** Expression pre-calculated after 500 ms of no typing; "=" then shows the result in ~4 ms (measured live, was ~170 ms). History panel slides in/out with no fade; rows no longer wobble on resize. History count and page title removed. Fade 50 ms. 151 frontend tests. Redeployed. Interpretation by Claude: "the title on top" = the page title, not the panel's HISTORY heading.
+
+```text
+remove the count of history on the right...
+moving the history modal size mamkes the number wobbly remove this, they should just readjust themselves normally, which is good right now, also the modal should have motion to the right when close it, not a fade out, same for when it's shown, like a lerp animation
+remove the title on top
+
+show about every 0.5s or 1s if the user hasn't typed the current expression is sent and returned the result which if the user clicks to see result the result feels instant
+
+fade should be 50ms
 ```
 
 ---
@@ -307,10 +326,10 @@ there's is still some delay when the user clicks to see the result, is this the 
 ## Totals
 
 Elapsed is wall-clock time from the first prompt minus breaks:
-17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:19:38 (23m 46s).
+17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:33:16 (37m 24s).
 
 | Measure | Time |
 |---------|------|
-| Elapsed, breaks excluded (as of 2026-11-15 11:19:38) | 2h 17m 35s |
-| Active, measured (prompts 6, 14, 17, 18) | 33m 01s |
+| Elapsed, breaks excluded (as of 2026-11-15 11:33:16) | 2h 31m 13s |
+| Active, measured (prompts 6, 14, 17–20) | 35m 34s |
 | Budget | 2h target, 4h ceiling |
