@@ -15,10 +15,15 @@ import (
 
 // RateLimiter applies a token bucket per client IP to /api/ requests.
 //
-// The client IP is taken from the connection's RemoteAddr only.
-// X-Forwarded-For is ignored because any client can set it. The trade-off:
-// behind a proxy or NAT, clients sharing an address share one bucket.
+// By default the client IP is the connection's RemoteAddr. X-Forwarded-For
+// is ignored because any client can set it. The trade-off: behind a proxy or
+// NAT, clients sharing an address share one bucket.
 type RateLimiter struct {
+	// IPHeader, when set, names a header holding the client IP. Set it only
+	// behind a proxy that overwrites the header on every request, e.g.
+	// "X-Real-IP" on Vercel; otherwise clients could spoof their IP.
+	IPHeader string
+
 	limit   rate.Limit
 	burst   int
 	idleTTL time.Duration
@@ -101,7 +106,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		ok, retryAfter := rl.allow(clientIP(r))
+		ok, retryAfter := rl.allow(rl.clientIP(r))
 		if !ok {
 			seconds := max(1, int(math.Ceil(retryAfter.Seconds())))
 			w.Header().Set("Retry-After", strconv.Itoa(seconds))
@@ -113,7 +118,14 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-func clientIP(r *http.Request) string {
+func (rl *RateLimiter) clientIP(r *http.Request) string {
+	if rl.IPHeader != "" {
+		// A proxy may append a chain ("client, proxy1"); the first entry is the client.
+		first, _, _ := strings.Cut(r.Header.Get(rl.IPHeader), ",")
+		if ip := strings.TrimSpace(first); ip != "" {
+			return ip
+		}
+	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr

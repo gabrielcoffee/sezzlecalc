@@ -177,10 +177,54 @@ func TestClientIP(t *testing.T) {
 		"[::1]:8080":    "::1",
 		"10.0.0.1":      "10.0.0.1", // no port
 	}
+	rl, _ := newTestLimiter(1, 1)
 	for remote, want := range tests {
 		r := &http.Request{RemoteAddr: remote}
-		if got := clientIP(r); got != want {
+		if got := rl.clientIP(r); got != want {
 			t.Errorf("clientIP(%q) = %q, want %q", remote, got, want)
 		}
+	}
+}
+
+func TestClientIPFromTrustedHeader(t *testing.T) {
+	rl, _ := newTestLimiter(1, 1)
+	rl.IPHeader = "X-Real-IP"
+	tests := []struct {
+		header, want string
+	}{
+		{"203.0.113.9", "203.0.113.9"},
+		{" 203.0.113.9 , 10.0.0.1", "203.0.113.9"},
+		{"", "10.0.0.1"}, // header missing: fall back to RemoteAddr
+	}
+	for _, tt := range tests {
+		r := &http.Request{RemoteAddr: "10.0.0.1:1234", Header: http.Header{}}
+		if tt.header != "" {
+			r.Header.Set("X-Real-IP", tt.header)
+		}
+		if got := rl.clientIP(r); got != tt.want {
+			t.Errorf("header %q: clientIP = %q, want %q", tt.header, got, tt.want)
+		}
+	}
+}
+
+func TestRateLimitPerClientBehindProxy(t *testing.T) {
+	rl, _ := newTestLimiter(1, 1)
+	rl.IPHeader = "X-Real-IP"
+	h := NewHandler(Config{RateLimiter: rl})
+	send := func(ip string) int {
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/add", strings.NewReader(`{"a":1,"b":2}`))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Real-IP", ip)
+		req.RemoteAddr = "10.0.0.1:1000" // same proxy address for everyone
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+		return rec.Code
+	}
+	send("203.0.113.1")
+	if code := send("203.0.113.1"); code != http.StatusTooManyRequests {
+		t.Fatalf("same client: status = %d, want 429", code)
+	}
+	if code := send("203.0.113.2"); code != http.StatusOK {
+		t.Fatalf("other client behind the same proxy: status = %d, want 200", code)
 	}
 }

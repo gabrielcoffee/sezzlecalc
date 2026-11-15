@@ -20,11 +20,14 @@ type config struct {
 	port      string
 	rateRPS   float64
 	rateBurst int
+	// ipHeader names a header with the real client IP, for use behind a
+	// proxy that overwrites it (X-Real-IP on Vercel). Empty: use RemoteAddr.
+	ipHeader string
 }
 
 // loadConfig reads settings from the environment, falling back to defaults.
 func loadConfig(getenv func(string) string) (config, error) {
-	cfg := config{port: "8080", rateRPS: 10, rateBurst: 20}
+	cfg := config{port: "8080", rateRPS: 10, rateBurst: 20, ipHeader: getenv("CLIENT_IP_HEADER")}
 	if v := getenv("PORT"); v != "" {
 		cfg.port = v
 	}
@@ -63,6 +66,7 @@ func run(logger *slog.Logger) error {
 	defer stop()
 
 	limiter := api.NewRateLimiter(cfg.rateRPS, cfg.rateBurst, 3*time.Minute)
+	limiter.IPHeader = cfg.ipHeader
 	go limiter.Run(ctx, time.Minute)
 
 	srv := &http.Server{
