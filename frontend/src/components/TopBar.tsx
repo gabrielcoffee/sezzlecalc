@@ -4,15 +4,17 @@ import { useSound } from '@/hooks/use-sound'
 import { blurIfPointer } from '@/lib/utils'
 
 interface Props {
-  historyCount: number
   onOpenHistory: () => void
 }
 
-export function TopBar({ historyCount, onOpenHistory }: Props) {
+export function TopBar({ onOpenHistory }: Props) {
   const { enabled, toggle } = useSound()
 
   return (
-    <header className="relative z-10 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:h-20 sm:px-6">
+    <header className="relative z-10 flex h-16 items-center justify-between gap-2 px-3 sm:h-20 sm:px-6">
+      {/* The name is on the calculator's nameplate; keep a heading for screen readers. */}
+      <h1 className="sr-only">SZLCALC 903 calculator</h1>
+
       <div className="justify-self-start">
         <Button
           variant="ghost"
@@ -30,10 +32,6 @@ export function TopBar({ historyCount, onOpenHistory }: Props) {
         </Button>
       </div>
 
-      <h1 className="font-display text-[0.8rem] tracking-[0.28em] text-[var(--page-ink)] sm:text-base">
-        SZLCALC <strong className="font-black">903</strong>
-      </h1>
-
       <div className="justify-self-end">
         <Button
           variant="ghost"
@@ -46,11 +44,6 @@ export function TopBar({ historyCount, onOpenHistory }: Props) {
         >
           <TapeRollIcon />
           <span className="hidden sm:inline">History</span>
-          {historyCount > 0 && (
-            <span className="chrome-badge" aria-hidden="true">
-              {historyCount}
-            </span>
-          )}
         </Button>
       </div>
     </header>

@@ -286,6 +286,15 @@ and how can I run all the tests?
 how can I test the IP rate limit?
 ```
 
+## Prompt 19 — Result delay question
+
+- **Start:** 2026-11-15 11:23:48
+- **Outcome:** Measured in Chrome, 12 runs each. Live: result on screen ~190 ms after the click, almost all of it the API round trip (~186 ms, the server is in the US); the fade adds ~115 ms more until full brightness. Local: request 3 ms, on screen 11 ms. Question only, no code changed.
+
+```text
+there's is still some delay when the user clicks to see the result, is this the server or the fade effect? check how much in ms it takes to show result
+```
+
 ---
 
 ## Breaks

@@ -2,6 +2,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { PREFETCH_DELAY_MS } from './hooks/use-calculator'
 import { HISTORY_KEY } from './hooks/use-history'
 import { SOUND_KEY } from './hooks/use-sound'
 import type { SoundEngine, SoundName } from './lib/sound'
@@ -158,6 +159,61 @@ describe('App', () => {
 
     await press('Turn sound on')
     expect(played.at(-1)).toBe('toggle')
+  })
+
+  describe('pre-calculation while typing pauses', () => {
+    const pause = () => act(() => new Promise((r) => setTimeout(r, PREFETCH_DELAY_MS + 100)))
+
+    it('sends the expression after a pause and answers "=" from it', async () => {
+      const fetchMock = mockApi({ '2 + 3': 5 })
+      const { press, value } = setup()
+      await press('2', 'plus', '3')
+      expect(fetchMock).not.toHaveBeenCalled() // not while typing
+      await pause()
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+
+      await press('equals')
+      await waitFor(() => expect(value()).toBe('5'))
+      expect(fetchMock).toHaveBeenCalledTimes(1) // no second request
+    })
+
+    it('reuses a definitive API error too', async () => {
+      const fetchMock = mockApi({ '1 ÷ 0': { status: 422, code: 'division_by_zero' } })
+      const { press, value } = setup()
+      await press('1', 'divide', '0')
+      await pause()
+      await press('equals')
+      await waitFor(() => expect(value()).toBe('Err'))
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('sends the new expression when typing continued after the pause', async () => {
+      const fetchMock = mockApi({ '2 + 3': 5, '2 + 34': 36 })
+      const { press, value } = setup()
+      await press('2', 'plus', '3')
+      await pause()
+      await press('4', 'equals')
+      await waitFor(() => expect(value()).toBe('36'))
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+    })
+
+    it('retries on "=" when the early request failed in transit', async () => {
+      let calls = 0
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => {
+          calls++
+          if (calls === 1) throw new TypeError('Failed to fetch')
+          return new Response(JSON.stringify({ result: 5 }), { status: 200 })
+        }),
+      )
+      const { press, value } = setup()
+      await press('2', 'plus', '3')
+      await pause()
+      await press('equals')
+      await waitFor(() => expect(value()).toBe('5'))
+      expect(calls).toBe(2)
+    })
   })
 
   it('C cancels a request in flight', async () => {

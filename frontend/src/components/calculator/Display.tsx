@@ -37,7 +37,7 @@ export function Display({ view, rejections, flashes }: Props) {
 
   useEffect(() => {
     if (flashes === 0) return
-    animate(value.current, { opacity: [0.2, 1] }, { duration: 0.12, ease: 'easeOut' })
+    animate(value.current, { opacity: [0.2, 1] }, { duration: 0.05, ease: 'easeOut' })
   }, [flashes, animate, value])
 
   // Keep the end of a long expression in view as it grows; the user can

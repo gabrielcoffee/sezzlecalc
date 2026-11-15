@@ -68,7 +68,7 @@ function Page() {
 
   return (
     <div className="page flex min-h-dvh flex-col">
-      <TopBar historyCount={history.entries.length} onOpenHistory={() => setOpen(true)} />
+      <TopBar onOpenHistory={() => setOpen(true)} />
       <main className="flex flex-1 items-start justify-center sm:items-center sm:p-6 sm:pb-12">
         <Calculator calc={calc} activeKey={activeKey} onPress={onPress} />
       </main>
