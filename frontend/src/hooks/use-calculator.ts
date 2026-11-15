@@ -17,7 +17,6 @@ export function useCalculator({ onResult }: Options = {}) {
   const { play } = useSound()
   const [state, setState] = useState<CalcState>(initialState)
   const [rejections, setRejections] = useState(0)
-  const [results, setResults] = useState(0)
 
   // The ref always holds the latest state, so handlers never act on a stale copy.
   const stateRef = useRef(state)
@@ -43,9 +42,9 @@ export function useCalculator({ onResult }: Options = {}) {
   const evaluate = useCallback(async () => {
     const prepared = prepare(stateRef.current)
     if (!prepared.ok) {
-      if (stateRef.current.pending) return // a request is already running
+      if (prepared.reason === 'pending') return // a request is already running
       reject()
-      apply({ type: 'hint', message: prepared.message })
+      if (prepared.reason === 'too-long') toast.error('The expression is too long')
       return
     }
 
@@ -57,8 +56,6 @@ export function useCalculator({ onResult }: Options = {}) {
     try {
       const result = await evaluateExpression(expression, { signal: controller.signal })
       apply({ type: 'evaluate-success', expression, result })
-      setResults((n) => n + 1)
-      play('success')
       onResultRef.current?.(expression, result)
     } catch (err) {
       if (controller.signal.aborted) return // cleared by the user
@@ -99,5 +96,5 @@ export function useCalculator({ onResult }: Options = {}) {
     [apply, play, reject],
   )
 
-  return { state, view: display(state), press, insert, rejections, results }
+  return { state, view: display(state), press, insert, rejections }
 }

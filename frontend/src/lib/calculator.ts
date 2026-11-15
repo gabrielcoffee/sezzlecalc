@@ -27,8 +27,6 @@ export interface CalcState {
   /** Expression that produced `result` or `error`. */
   lastExpression: string | null
   error: string | null
-  /** Short notice for input that was refused, e.g. pressing "=" on "2 +". */
-  hint: string | null
   pending: boolean
 }
 
@@ -44,7 +42,6 @@ export type Action =
   | { type: 'backspace' }
   | { type: 'clear' }
   | { type: 'insert'; value: number }
-  | { type: 'hint'; message: string }
   | { type: 'evaluate-start' }
   | { type: 'evaluate-success'; expression: string; result: number }
   | { type: 'evaluate-error'; expression: string; message: string }
@@ -59,7 +56,6 @@ export const initialState: CalcState = {
   result: null,
   lastExpression: null,
   error: null,
-  hint: null,
   pending: false,
 }
 
@@ -73,10 +69,8 @@ export function reduce(state: CalcState, action: Action): CalcState {
   switch (action.type) {
     case 'clear':
       return initialState
-    case 'hint':
-      return { ...state, hint: action.message }
     case 'evaluate-start':
-      return { ...state, pending: true, hint: null }
+      return { ...state, pending: true }
     case 'evaluate-success':
       return {
         ...initialState,
@@ -244,16 +238,28 @@ export function serialize(tokens: Token[]): string {
     .join('')
 }
 
-export type Prepared = { ok: true; expression: string } | { ok: false; message: string }
+export type Prepared =
+  | { ok: true; expression: string }
+  | { ok: false; reason: 'pending' | 'empty' | 'too-long' }
 
-/** Checks that the input can be sent and closes any open parentheses. */
+/**
+ * Turns the input into the expression to send. An unfinished tail is
+ * dropped instead of refused: "2 + 3 ×" sends "2 + 3", "2 + (" sends "2".
+ * Open parentheses are closed.
+ */
 export function prepare(state: CalcState): Prepared {
-  if (state.pending) return { ok: false, message: 'Already calculating' }
-  if (state.tokens.length === 0) return { ok: false, message: 'Enter a calculation' }
-  if (!endsWithValue(state.tokens)) return { ok: false, message: 'Finish the expression first' }
-  const expression = serialize(state.tokens) + ')'.repeat(openParens(state.tokens))
-  if (expression.length > MAX_EXPRESSION_LENGTH) return { ok: false, message: 'Expression is too long' }
+  if (state.pending) return { ok: false, reason: 'pending' }
+  const tokens = withoutUnfinishedTail(state.tokens)
+  if (tokens.length === 0) return { ok: false, reason: 'empty' }
+  const expression = serialize(tokens) + ')'.repeat(openParens(tokens))
+  if (expression.length > MAX_EXPRESSION_LENGTH) return { ok: false, reason: 'too-long' }
   return { ok: true, expression }
+}
+
+function withoutUnfinishedTail(tokens: Token[]): Token[] {
+  let end = tokens.length
+  while (end > 0 && !endsWithValue(tokens.slice(0, end))) end--
+  return tokens.slice(0, end)
 }
 
 // ---- display ----

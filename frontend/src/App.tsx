@@ -29,6 +29,7 @@ function Page() {
   const history = useHistory()
   const calc = useCalculator({ onResult: history.add })
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyOpenedAt, setHistoryOpenedAt] = useState(() => new Date())
   const [activeKey, setActiveKey] = useState<string | null>(null)
   const releaseTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
@@ -50,6 +51,7 @@ function Page() {
   useKeyboard(onKeyboard, !historyOpen)
 
   const setOpen = (open: boolean) => {
+    if (open) setHistoryOpenedAt(new Date())
     setHistoryOpen(open)
     play(open ? 'open' : 'close')
   }
@@ -72,6 +74,7 @@ function Page() {
       </main>
       <HistorySheet
         open={historyOpen}
+        openedAt={historyOpenedAt}
         onOpenChange={setOpen}
         entries={history.entries}
         onSelect={selectEntry}

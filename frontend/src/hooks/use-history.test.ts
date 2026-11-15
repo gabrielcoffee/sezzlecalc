@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { HISTORY_KEY, HISTORY_LIMIT, useHistory } from './use-history'
+import { groupByDay, HISTORY_KEY, HISTORY_LIMIT, useHistory, type HistoryEntry } from './use-history'
 
 describe('useHistory', () => {
   it('starts empty and adds entries newest first', () => {
@@ -57,5 +57,33 @@ describe('useHistory', () => {
     const { result } = renderHook(() => useHistory())
     act(() => result.current.add('1 + 1', 2))
     expect(result.current.entries).toHaveLength(1)
+  })
+})
+
+describe('groupByDay', () => {
+  const now = new Date(2026, 10, 15, 11, 0)
+  const at = (y: number, m: number, d: number, h = 12): HistoryEntry => ({
+    id: `${y}-${m}-${d}-${h}`,
+    expression: 'x',
+    result: 1,
+    time: new Date(y, m, d, h).getTime(),
+  })
+
+  it('labels today, yesterday and older days, keeping order', () => {
+    const entries = [at(2026, 10, 15, 10), at(2026, 10, 15, 1), at(2026, 10, 14, 23), at(2026, 10, 9)]
+    const groups = groupByDay(entries, now)
+    expect(groups.map((g) => [g.label, g.entries.length])).toEqual([
+      ['Today', 2],
+      ['Yesterday', 1],
+      ['Mon, Nov 9', 1],
+    ])
+  })
+
+  it('handles yesterday across a month boundary', () => {
+    expect(groupByDay([at(2026, 9, 31)], new Date(2026, 10, 1, 9))[0].label).toBe('Yesterday')
+  })
+
+  it('returns no groups for no entries', () => {
+    expect(groupByDay([], now)).toEqual([])
   })
 })

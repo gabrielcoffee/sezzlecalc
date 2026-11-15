@@ -186,22 +186,29 @@ describe('prepare', () => {
   })
 
   it.each([
-    ['', 'Enter a calculation'],
-    ['2+', 'Finish the expression first'],
-    ['r', 'Finish the expression first'],
-  ])('refuses "%s"', (input, message) => {
-    expect(prepare(keys(input))).toEqual({ ok: false, message })
+    ['2+', '2'],
+    ['2+3*', '2 + 3'],
+    ['2+(', '2'],
+    ['(2+', '(2)'],
+    ['2*r', '2'],
+    ['2*(-', '2'],
+  ])('drops the unfinished tail of "%s" → %s', (input, expression) => {
+    expect(prepare(keys(input))).toEqual({ ok: true, expression })
+  })
+
+  it.each([[''], ['r'], ['('], ['-']])('has nothing to send for "%s"', (input) => {
+    expect(prepare(keys(input))).toEqual({ ok: false, reason: 'empty' })
   })
 
   it('refuses while pending', () => {
-    expect(prepare(reduce(keys('2'), { type: 'evaluate-start' })).ok).toBe(false)
+    expect(prepare(reduce(keys('2'), { type: 'evaluate-start' }))).toEqual({ ok: false, reason: 'pending' })
   })
 
   it('refuses when closing parentheses would exceed the length limit', () => {
     let state = initialState
     for (let i = 0; i < 128; i++) state = reduce(state, toAction('('))
     state = reduce(state, toAction('1'))
-    expect(prepare(state)).toEqual({ ok: false, message: 'Expression is too long' })
+    expect(prepare(state)).toEqual({ ok: false, reason: 'too-long' })
   })
 })
 
@@ -209,12 +216,6 @@ describe('evaluation lifecycle', () => {
   it('success shows the result and its expression', () => {
     const s = reduce(keys('2+2'), { type: 'evaluate-success', expression: '2 + 2', result: 4 })
     expect(s).toMatchObject({ result: 4, lastExpression: '2 + 2', tokens: [], pending: false })
-  })
-
-  it('hint is shown until the next accepted key', () => {
-    const hinted = reduce(keys('2+'), { type: 'hint', message: 'Finish the expression first' })
-    expect(hinted.hint).toBe('Finish the expression first')
-    expect(keys('3', hinted).hint).toBeNull()
   })
 })
 

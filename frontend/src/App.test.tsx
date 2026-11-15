@@ -46,7 +46,7 @@ describe('App', () => {
     await waitFor(() => expect(value()).toBe('14'))
     expect(screen.getByText('2 + 3 × 4 =')).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(played).toEqual(['digit', 'operator', 'digit', 'operator', 'digit', 'equals', 'success'])
+    expect(played).toEqual(['digit', 'operator', 'digit', 'operator', 'digit', 'equals'])
   })
 
   it('shows Err and a toast when the API refuses', async () => {
@@ -62,13 +62,21 @@ describe('App', () => {
     expect(value()).toBe('0')
   })
 
-  it('does not send an unfinished expression', async () => {
+  it('ignores a trailing operator on equals', async () => {
+    const fetchMock = mockApi({ '2 + 3': 5 })
+    const { press, value } = setup()
+
+    await press('2', 'plus', '3', 'times', 'equals')
+    await waitFor(() => expect(value()).toBe('5'))
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(screen.getByText('2 + 3 =')).toBeInTheDocument()
+  })
+
+  it('does nothing on equals with nothing to calculate', async () => {
     const fetchMock = mockApi({})
     const { press, played } = setup()
-
-    await press('2', 'plus', 'equals')
+    await press('square root', 'equals')
     expect(fetchMock).not.toHaveBeenCalled()
-    expect(screen.getByText('Finish the expression first')).toBeInTheDocument()
     expect(played.at(-1)).toBe('reject')
   })
 
@@ -110,7 +118,7 @@ describe('App', () => {
 
     await press('Open history')
     await user.click(await screen.findByRole('button', { name: 'Clear history' }))
-    expect(within(screen.getByRole('dialog')).getByText('No calculations yet.')).toBeInTheDocument()
+    expect(within(screen.getByRole('dialog')).getByText('NO CALCULATIONS YET')).toBeInTheDocument()
   })
 
   it('mutes sounds and remembers the setting', async () => {

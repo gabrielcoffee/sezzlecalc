@@ -27,6 +27,30 @@ function isEntryList(v: unknown): v is HistoryEntry[] {
   return Array.isArray(v) && v.every(isEntry)
 }
 
+export interface HistoryGroup {
+  label: string
+  entries: HistoryEntry[]
+}
+
+const dayFormat = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+
+/** Splits entries (newest first) into days: "Today", "Yesterday", then dates. */
+export function groupByDay(entries: HistoryEntry[], now: Date): HistoryGroup[] {
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const today = startOfDay(now)
+  const yesterday = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1))
+
+  const groups: HistoryGroup[] = []
+  for (const entry of entries) {
+    const day = startOfDay(new Date(entry.time))
+    const label = day === today ? 'Today' : day === yesterday ? 'Yesterday' : dayFormat.format(day)
+    const last = groups.at(-1)
+    if (last?.label === label) last.entries.push(entry)
+    else groups.push({ label, entries: [entry] })
+  }
+  return groups
+}
+
 let counter = 0
 
 /** Calculation history, newest first, kept in localStorage. */

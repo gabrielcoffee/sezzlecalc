@@ -3,49 +3,64 @@ import { createSoundEngine, type SoundName } from './sound'
 
 function fakeContext(state: AudioContextState = 'running') {
   const param = () => ({ setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() })
+  const node = () => ({ connect: vi.fn((n: unknown) => n) })
+  const sources: { start: ReturnType<typeof vi.fn> }[] = []
   const oscillators: { start: ReturnType<typeof vi.fn> }[] = []
-  const ctx = {
+  const raw = {
     state,
     currentTime: 0,
+    sampleRate: 8000,
     destination: {},
     resume: vi.fn(async () => {}),
-    createOscillator: vi.fn(() => {
-      const osc = { type: 'sine', frequency: param(), connect: vi.fn((n) => n), start: vi.fn(), stop: vi.fn() }
-      oscillators.push(osc)
-      return osc
+    createBuffer: vi.fn((_ch: number, length: number) => {
+      const data = new Float32Array(length)
+      return { getChannelData: () => data }
     }),
-    createGain: vi.fn(() => ({ gain: param(), connect: vi.fn((n) => n) })),
+    createBufferSource: vi.fn(() => {
+      const s = { ...node(), buffer: null, start: vi.fn(), stop: vi.fn() }
+      sources.push(s)
+      return s
+    }),
+    createBiquadFilter: vi.fn(() => ({ ...node(), type: '', frequency: param(), Q: param() })),
+    createOscillator: vi.fn(() => {
+      const o = { ...node(), type: '', frequency: param(), start: vi.fn(), stop: vi.fn() }
+      oscillators.push(o)
+      return o
+    }),
+    createGain: vi.fn(() => ({ ...node(), gain: param() })),
   }
-  return { ctx: ctx as unknown as AudioContext, oscillators, raw: ctx }
+  return { ctx: raw as unknown as AudioContext, raw, sources, oscillators }
 }
 
+const ALL: SoundName[] = [
+  'digit', 'operator', 'function', 'equals', 'clear', 'backspace',
+  'error', 'reject', 'toggle', 'open', 'close', 'select',
+]
+
 describe('createSoundEngine', () => {
-  it('creates the AudioContext lazily, once', () => {
-    const { ctx } = fakeContext()
+  it('creates the AudioContext and noise buffer lazily, once', () => {
+    const { ctx, raw } = fakeContext()
     const factory = vi.fn(() => ctx)
     const engine = createSoundEngine(factory)
     expect(factory).not.toHaveBeenCalled()
     engine.play('digit')
     engine.play('operator')
     expect(factory).toHaveBeenCalledTimes(1)
+    expect(raw.createBuffer).toHaveBeenCalledTimes(1)
   })
 
-  it('schedules one oscillator per tone', () => {
-    const { ctx, oscillators } = fakeContext()
-    const engine = createSoundEngine(() => ctx)
-    engine.play('success') // two tones
-    expect(oscillators).toHaveLength(2)
-    expect(oscillators.every((o) => o.start.mock.calls.length === 1)).toBe(true)
+  it('plays a key press as a press and a release click with a body thump', () => {
+    const { ctx, sources, oscillators } = fakeContext()
+    createSoundEngine(() => ctx).play('digit')
+    expect(sources).toHaveLength(2) // press + release
+    expect(oscillators).toHaveLength(1) // body on the press only
+    expect(sources[1].start.mock.calls[0][0]).toBeGreaterThan(sources[0].start.mock.calls[0][0])
   })
 
   it('has a recipe for every sound', () => {
     const { ctx } = fakeContext()
     const engine = createSoundEngine(() => ctx)
-    const names: SoundName[] = [
-      'digit', 'operator', 'function', 'equals', 'clear', 'backspace', 'success',
-      'error', 'reject', 'toggle', 'open', 'close', 'select',
-    ]
-    for (const name of names) expect(() => engine.play(name)).not.toThrow()
+    for (const name of ALL) expect(() => engine.play(name)).not.toThrow()
   })
 
   it('resumes a suspended context (autoplay policy)', () => {
@@ -66,11 +81,11 @@ describe('createSoundEngine', () => {
   })
 
   it('uses the browser AudioContext by default', () => {
-    const { ctx } = fakeContext()
+    const { ctx, raw } = fakeContext()
     vi.stubGlobal('AudioContext', function () {
       return ctx
     })
-    expect(() => createSoundEngine().play('digit')).not.toThrow()
-    expect((ctx as unknown as ReturnType<typeof fakeContext>['raw']).createOscillator).toHaveBeenCalled()
+    createSoundEngine().play('digit')
+    expect(raw.createBufferSource).toHaveBeenCalled()
   })
 })

@@ -81,18 +81,35 @@
 }
 
 .display-expression {
+  /* Long expressions scroll sideways (drag, swipe or trackpad); auto margin
+     keeps short ones right-aligned without hiding the start of long ones. */
   display: flex;
-  justify-content: flex-end; /* long expressions overflow to the left: the end stays visible */
-  overflow: hidden;
-  height: 1.1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 1.35rem;
+  padding-bottom: 0.25rem;
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: 0.78rem;
   line-height: 1.1rem;
-  color: rgb(255 140 70 / 0.7);
+  color: rgb(255 140 70 / 0.75);
   white-space: nowrap;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 106 31 / 0.35) transparent;
+  overscroll-behavior-x: contain;
 }
-.display-expression[data-hint] {
-  color: #ffb27a;
+.display-expression > span {
+  margin-left: auto;
+}
+.display-expression:focus-visible {
+  outline: 1px solid rgb(255 140 70 / 0.6);
+  outline-offset: 2px;
+}
+.display-expression::-webkit-scrollbar {
+  height: 3px;
+}
+.display-expression::-webkit-scrollbar-thumb {
+  background: rgb(255 106 31 / 0.35);
+  border-radius: 2px;
 }
 
 .display-main {
@@ -123,14 +140,6 @@
   text-shadow:
     0 0 6px var(--segment-glow),
     0 0 18px rgb(255 80 0 / 0.25);
-}
-
-.calc-display[data-pending] .display-value {
-  animation: segment-pulse 0.8s ease-in-out infinite;
-}
-
-@keyframes segment-pulse {
-  50% { opacity: 0.35; }
 }
 
 /* ---- nameplate ---- */
