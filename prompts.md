@@ -369,6 +369,33 @@ if the user press = on an expression they've already typed, are the results cach
 
 Attached image: a brushed-metal texture (grey, vertical brushing, bright band in the middle).
 
+## Prompt 23 — Symbol sizes, shell texture, answer cache
+
+- **Start:** 2026-11-15 12:10:18
+- **End:** 2026-11-15 12:12:54
+- **Active:** 2m 36s
+- **Outcome:** Operator legends enlarged to match digits; history X restored; shell uses the user's texture plus shading; nameplate gaps equal (16 px) with text centred. Pre-calculation skips expressions with nothing to calculate; answers cached by expression and seeded from history. Answered: only one early request is ever in flight, each new one cancels the previous. 171 frontend tests. Redeployed.
+
+```text
+some buttons have their icons too small
+they should all have almost the same size like the numbers
+examples are = + - x division and the +- and the delete a bit too
+
+ok the X on the history can come back instead of close
+
+use this texture on the calculator: [Image #5] add some subtle shading to make the calculator body looks more realistic
+
+on the pre calculation answers:
+ok for incomplete, yes it should skip skipables like just 2 +, how can we check this? only one number was typed? so no matter the op after it?, with exceptions like sqrt and then a number which does return a result.
+precalc cancels ALL old requests? not just last one right?
+
+on the improvements yes both
+
+oh and the silver pad and title shouold be aligned. the pad between exactly same gap from screen and keyboard and the title inside too vertical alignment please
+```
+
+Attached image: a plain warm-cream plastic texture.
+
 ---
 
 ## Breaks
@@ -381,10 +408,10 @@ Attached image: a brushed-metal texture (grey, vertical brushing, bright band in
 ## Totals
 
 Elapsed is wall-clock time from the first prompt minus breaks:
-17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:58:41 (1h 02m 49s).
+17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 12:12:54 (1h 17m 02s).
 
 | Measure | Time |
 |---------|------|
-| Elapsed, breaks excluded (as of 2026-11-15 11:58:41) | 2h 56m 38s |
-| Active, measured (prompts 6, 14, 17–22) | 42m 30s |
+| Elapsed, breaks excluded (as of 2026-11-15 12:12:54) | 3h 10m 51s |
+| Active, measured (prompts 6, 14, 17–23) | 45m 06s |
 | Budget | 2h target, 4h ceiling |
