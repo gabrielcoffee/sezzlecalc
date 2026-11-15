@@ -244,6 +244,24 @@ alright I'll let you know when I'm back to read the result, pause the timer as s
 im back I'll start reading the results and testing the app
 ```
 
+## Prompt 17 — Frontend review fixes
+
+- **Start:** 2026-11-15 11:04:45
+- **End:** 2026-11-15 11:09:31
+- **Active:** 4m 46s
+- **Outcome:** All seven fixes done, 140 frontend tests pass, live site redeployed. Mechanical key-click sounds; results appear instantly; `=` drops an unfinished tail instead of showing a message; expression line scrolls horizontally; sound button left, history right, keycap buttons in the title font with custom skeuomorphic SVG icons; history grouped by day, no timestamps or subtitle, expression above result without `=`, panel resizable.
+
+```text
+a few fixes:
+-find better sound effect, like a keyboard or a real calculator one
+- for showing results show instantly and not with a fade in or fade out
+-never show finish the expression as an error, if the user typed some operation and no other number and followed with a =, it shoould ignore the last operation
+-the line of operations can get too long that you can't see the start, let the user scroll horizontally the line above the resuls to see the start and end of the set of operations
+-the history can be on the right and sound on the left, remove subtitles on the history modal, let the user stretch the modal size
+- the history is confusing, remove the timestamps just separate by day, place the expression on the timestamp part and the result doesn't need = before it
+-keep consistent design, use the same fon used on the title to the buttons on the left and right, find skeumorphic icons for history and sound and clear history too, use the same font and skeumorphic icon
+```
+
 ---
 
 ## Breaks
@@ -256,10 +274,10 @@ im back I'll start reading the results and testing the app
 ## Totals
 
 Elapsed is wall-clock time from the first prompt minus breaks:
-17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s).
+17:41:26 → 18:39:45 (58m 19s) + 08:07:17 → 09:02:47 (55m 30s) + 10:55:52 → 11:09:31 (13m 39s).
 
 | Measure | Time |
 |---------|------|
-| Elapsed, breaks excluded (as of 2026-11-15 09:02:47) | 1h 53m 49s |
-| Active, measured (prompts 6 and 14) | 25m 19s |
+| Elapsed, breaks excluded (as of 2026-11-15 11:09:31) | 2h 07m 28s |
+| Active, measured (prompts 6, 14 and 17) | 30m 05s |
 | Budget | 2h target, 4h ceiling |
